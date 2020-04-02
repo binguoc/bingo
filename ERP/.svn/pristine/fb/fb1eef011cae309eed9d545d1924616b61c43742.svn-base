@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.purchaseMapper.PurchaseMapper">
+	<sql id="mysql">
+		<if test="id!=null and id!=''">
+			and p.puRealid like '%${id}%'
+		</if>
+		<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+			and p.puTime between #{startTime} and #{endTime}
+		</if>
+		<if test="startMoney!=null and endMoney!=''">
+			and p.puTotalmoney between #{startMoney} and #{endMoney}
+		</if>
+		<if test="status!=null and status!=''">
+			and p.puStatus=#{status}
+		</if>
+	</sql>	
+	<!--分页条件查询  -->
+	<select id="queryByPurchase" parameterType="purchaseVo" resultType="purchase">
+			select p.puRealid,p.puTime,p.puTotalmoney,
+			e.f_name puUserid,p.puStatus,te.f_name puStatusid,p.puAuduttime,p.puOpinion 
+			from purchase p left join t_emp e on p.puUserid=e.f_z
+			left join t_emp te on p.puStatusUserid=te.f_z
+			<trim prefix="where" prefixOverrides="and">
+				<include refid="mysql"/>
+			</trim>
+	</select>
+	<!--多表查询单个采购单表  -->
+	<select id="queryByOnePurchase" parameterType="string" resultType="purchase">
+			select t1.puRealid,t1.puTime,t1.puTotalmoney,t1.puUserid,t1.puStatus,t1.puAuduttime,t1.puOpinion,t1.puStockStatus,e2.f_name puStatusid from(
+			select pu.puRealid puRealid,pu.puTime puTime,pu.puTotalmoney puTotalmoney,e.f_name puUserid,pu.puStatus puStatus,
+ 			pu.puStatusUserid statu,pu.puAuduttime puAuduttime,pu.puOpinion puOpinion,pu.puStockStatus puStockStatus from purchase pu 
+			left join detailed de  on pu.puRealid=de.puId
+			left join brand br on de.deBrid=br.brId
+			left join warestype waty on de.deWaTypeid=waty.waId
+			left join wares wa on de.deWaid=wa.waId
+			left join firm fi on de.defiid=fi.fiId	
+			left join t_emp e on e.f_z=pu.puUserid
+			where pu.puRealid=#{puRealid}) t1
+			left join t_emp e2 on e2.f_z=t1.statu
+	</select>
+	
+	
+	<!--多表查询单个采购详情表-->
+	<select id="queryByOneDetailed" parameterType="string" resultType="detailed">
+			select de.*,de.puId puid,br.brName deBrname,br.brId deBrid,waty.waName deTypename,waty.waId deTypeid,wa.waName deWaname,wa.waId deWaid,
+			wa.waUnit deWaUnit,fi.fiName deFiname,de.deCount,de.deMonovalent,de.deMoney   
+			from purchase pu 
+			left join detailed de on pu.puRealid=de.puId
+			left join brand br on de.deBrid=br.brId
+			left join warestype waty on de.deWaTypeid=waty.waId
+			left join wares wa on de.deWaid=wa.waId
+			left join firm fi on de.defiid=fi.fiId	
+			left join t_emp e on e.f_z=pu.puUserid
+					where pu.puRealid=#{puRealid}
+	</select>
+	
+	<select id="deletePurchase" parameterType="string">
+			delete from purchase where puRealid=#{puRealid}
+	</select>
+	<select id="queryAllBrname" resultType="brand">
+			select * from brand
+	</select>
+	
+	<select id="queryByAllTypename" parameterType="int" resultType="warestype">
+			select * from warestype where brandid=#{brId}
+	</select>
+	
+	<select id="queryMaxId" resultType="int">
+			select COUNT(*) from purchase
+	</select>
+	
+	<select id="queryByAllWaname" parameterType="int" resultType="wares">
+			select * from wares where waWarestypeid=#{waWarestypeid}
+	</select>
+	
+	<select id="queryByAllFiname" resultType="firm">
+			select * from firm
+	</select>
+	
+	<select id="addPurchase" parameterType="purchase">
+			insert into purchase 
+			values(#{puRealid},#{puTime},#{puTotalmoney},#{puUserid},#{puStatus},null,null,null,0)
+	</select>
+	
+	<select id="addDetailed" parameterType="detailed">
+			insert into detailed values(#{deId},#{puId},#{deBrname},#{deTypename},#{deWaname},#{deFiname},#{deCount},#{deMonovalent},#{deMoney})
+	</select>
+	
+	<select id="queryNameid" parameterType="string" resultType="user">
+		select * from t_emp where f_name=#{puRealid}
+	</select>
+	
+	<select id="updateDetailed" parameterType="detailed">
+		update detailed set deBrid=#{deBrname},deWaTypeid=#{deTypename},deWaid=#{deWaname},deFiid=#{deFiname},
+		deCount=#{deCount},deMonovalent=#{deMonovalent},deMoney=#{deMoney} where puId=#{puId}
+	</select>
+	
+	<select id="deleteDetailed" parameterType="purchase">
+		delete from detailed where puId=#{puRealid}
+	</select>
+	
+	<select id="queryStatus" parameterType="purchaseVo" resultType="purchase">
+			select p.puRealid,p.puTime,p.puTotalmoney,
+			e.f_name puUserid,p.puStatus,te.f_name puStatusid,p.puAuduttime,p.puOpinion 
+			from purchase p left join t_emp e on p.puUserid=e.f_z
+			left join t_emp te on p.puStatusUserid=te.f_z 
+			where p.puStatus=2
+			<trim>
+				<include refid="mysql"/>
+			</trim>
+	</select>
+	
+	<select id="updateStatus" parameterType="purchase">
+			update purchase set puOpinion=#{puOpinion},puStatus=#{puStatus} where puRealid=#{puRealid}
+	</select>
+	
+	<select id="queryAllAudut" resultType="purchaseAudutVo">
+			select p.f_id positionId,p.f_name positionName,e.f_z userId,e.f_name userName 
+			from t_position p left join t_emp e on p.f_id=e.F_positionid where p.f_id=(
+			select f_id from t_position where f_deptId = (
+			select f_id from t_dept where f_name='采购部') and f_name='部门经理'
+			)
+	</select>
+	
+	<select id="updateStatusAndUser" resultType="purchase">
+			update purchase set puStatus=2,puUserid=#{puUserid} where puRealid=#{puRealid}
+	</select>
+	
+	<select id="updatePurchase" parameterType="purchase">
+			update purchase set puTotalmoney=#{puTotalmoney} where puRealid=#{puRealid}
+	</select>
+	
+	
+	
+	
+</mapper>

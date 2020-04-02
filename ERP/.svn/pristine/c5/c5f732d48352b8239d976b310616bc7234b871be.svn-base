@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ztkj.mapper.storageMapper.StorageMapper">
+	
+	<!--  一对一关联 使用association-->
+	<resultMap type="storage" id="storageAndEmp">
+		<id property="stId" column="stId"/>
+			<result property="stName" column="stName" javaType="string"/>
+			<result property="stAddress" column="stAddress"/>
+			<result property="stArea" column="stArea"/>
+			<result property="stPhone" column="stPhone"/>
+			<result property="stContent" column="stContent"/>
+			<result property="stStatus" column="stStatus"/>
+			<result property="stCreateMan" column="stCreateMan"/>
+			<result property="stTime" column="stTime"/>
+			<association property="user" javaType="user">
+				<id property="f_z" column="f_z"/> 
+				<result property="f_name" column="f_name"/>
+			</association>	
+			<!-- 与城市一对一  -->
+			<association property="city" javaType="city">
+				<id property="city_id" column="city_id"/>
+				<result property="city_name" column="city_name"/>
+				<association property="province" javaType="province">
+					<id property="pro_id" column="pro_id"/>
+					<result property="pro_name" column="pro_name"/>
+			    </association>	
+			</association>
+				
+				
+	</resultMap>
+	
+	<resultMap type="city" id="cityAndProvince">
+		<id property="city_id" column="city_id"/>
+		<result property="city_name" column="city_name"/>
+		<association property="province" javaType="province">
+			<id property="pro_id" column="pro_id"/>
+			<result property="pro_name" column="pro_name"/>
+		</association>
+	</resultMap>
+	
+	<resultMap type="province" id="selectProvince">
+			<id property="pro_id" column="pro_id"/>
+			<result property="pro_name" column="pro_name"/>
+	</resultMap>
+	
+	<!-- 分页查询所有的仓库 -->
+	<select id="queryAllStorage" parameterType="storage" resultMap="storageAndEmp">
+	
+				 
+		 SELECT * from
+			(  SELECT s.*,e.f_name from storaget s INNER JOIN t_emp e ON s.stEmpID=e.f_z) se
+			  INNER JOIN
+			( SELECT c.city_id,c.city_name,p.pro_name from t_city c INNER JOIN t_province p on c.pro_id= p.pro_id
+	        	) cp on cp.city_id=se.stCity
+	       <trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+			   <if test="stName!='' and stName!=null">
+					 and stName like  '%' #{stName} '%'
+			   </if>
+				<if test="city!=null and city.province!=null  and city.province.pro_name!='' and city.province.pro_name!=null ">
+					and pro_name = #{city.province.pro_name}
+				</if>
+				<if test="city!=null and city.city_name!='' and  city.city_name!=null ">
+					and city_name=#{city.city_name}
+				</if>
+	        </trim>
+			       
+				 
+	</select> 
+	
+	
+	<!-- 注销仓库 -->
+	<select id="cancelStorage" parameterType="storage" resultType="Integer">
+		update storaget set stStatus=0 where stId=#{stId}
+	</select>
+	
+	<!-- 恢复仓库 -->
+	<select id="recoverStorage" parameterType="storage" resultType="Integer">
+		update storaget set stStatus=1 where stId=#{stId}
+	</select>
+	
+	<!-- Storage查询详情 -->
+	<select id="queryStorageById" parameterType="storage" resultMap="storageAndEmp">
+		select st.*,te.f_name from storaget st, t_emp te  where st.stEmpID=te.f_z and stId=#{stId}
+	</select>
+	
+	<!--  查询省-->
+	<select id="selectByProvince" parameterType="province" resultMap="selectProvince">
+		select * from t_province
+	</select>
+	<!--  二级 联动查询市-->	
+	<select id="selectByCity" parameterType="city" resultMap="cityAndProvince">
+ 		select * from t_city tc ,t_province tp where tc.pro_id = tp.pro_id and tp.pro_name=#{city_name}
+ 	</select>
+ 	
+ 	
+	
+ 	<!-- 只能是财务部仓库管理员职位 -->
+ 	<select id="queryUserPosition"  resultType="user">
+ 		select te.f_name,te.f_z from t_emp te left join t_position tp on te.F_positionid=tp.f_id 
+		left join t_dept td on td.f_id=tp.f_deptId where td.f_id='003'
+ 	</select>
+ 	
+ 	<!-- 添加仓库 -->
+	<select id="addStorage" parameterType="storage" resultType="Integer">
+ 		insert into storaget VALUES(null,#{stName},#{stAddress},#{stArea},#{user.f_z},#{stPhone},#{stContent},#{stStatus},#{stCreateMan},#{stTime},#{city.city_id})
+ 	</select>
+ 	
+ 	<!--  修改仓库的回选-->
+ 	<select id="queryByStId" parameterType="storage" resultMap="storageAndEmp">
+ 		SELECT * from
+			(  SELECT s.*,e.f_name,e.f_z from storaget s INNER JOIN t_emp e ON s.stEmpID=e.f_z) se
+			  INNER JOIN
+			( SELECT c.city_id,c.city_name,p.pro_name from t_city c INNER JOIN t_province p on c.pro_id= p.pro_id
+	        	) cp on cp.city_id=se.stCity where  se.stId=#{stId}
+ 	</select>
+ 	 <!-- 修改仓库 -->
+ 	
+ 	<select id="updateStorage" parameterType="storage" resultType="Integer">
+ 		update storaget set
+ 	   	 stName=#{stName},
+		 stAddress=#{stAddress},
+		 stArea=#{stArea},
+		 stEmpID=#{user.f_z},
+		 stPhone=#{stPhone},
+		 stContent=#{stContent},
+		 stStatus=#{stStatus},
+		 stCreateMan=#{stCreateMan},
+		 stTime=#{stTime},
+		 stCity=#{city.city_id}
+		 where stId=#{stId}
+ 		
+ 	</select> 
+ 	
+ 	
+</mapper>

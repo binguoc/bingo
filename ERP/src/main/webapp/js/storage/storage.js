@@ -1,0 +1,342 @@
+var page;
+function toPage(value){
+	$("input[name=pageNum]").val(value);//每次点击查询按钮，当前页初始化为1
+	queryAllStorage();//按条件分页查询，显示数据
+}
+function timeToDate(data) {
+    var d = new Date(data);//时间戳记得乘以1000再进行处理
+    var year = d.getFullYear();
+    var month = d.getMonth()+1;
+    var date = d.getDate();
+    var hour = d.getHours();
+    var minute = d.getMinutes();
+    var second = d.getSeconds();
+    return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
+}
+/**
+ * 获取地址栏传值
+ * @param name
+ * @returns
+ */
+function getUrlParam(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    if (r != null) return unescape(r[2]); return null; //返回参数值
+}
+
+function selectProvince1() {
+	$.ajax({
+		url:"selectByProvince.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value=''>请选择省份</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.pro_name+"'>"+this.pro_name+"</option>";
+			});
+			$("#ssid1").html(str);
+		}
+	});
+	
+}
+/**
+ * 
+ * @returns
+ */
+function selectCity1() {
+	var city_name=$("#ssid1").val();
+	$.ajax({
+		url:"selectByCity.action",
+		data:{"city_name":city_name},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value=''>请选择城市</option>";
+			$(result).each(function(){
+				str += "<option value='"+this.city_id+"'>"+this.city_name+"</option>";
+			});
+			$("#city1").html(str);
+		}
+	});
+}
+
+
+function tipOpen(content,stId,stStatus) {
+	if(stStatus==1){
+		$(".sure").attr("onclick","cancelStorage('"+stId+"','"+stStatus+"')");
+	}else{
+		$(".sure").attr("onclick","recoverStorage('"+stId+"','"+stStatus+"')");
+	}
+	$(".tipright p").text(content);
+	$("#tip").fadeIn(200);
+}
+function tipClose() {
+	$("#tip").fadeOut(200);
+}
+
+//查询所有的仓库
+function queryAllStorage(){
+	var data = $("#selectForm").serialize();
+	$.ajax({
+		url:"queryAllStorage.action",
+		data:data,
+		async:false,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var i=1;
+			var trs = "";
+			$(result.list).each(function(){
+				trs+="<tr>";
+				trs+="<td>"+i+"</td>";
+				trs+="<td>"+this.stName+"</td>";
+				trs+="<td>"+this.user.f_name+"</td>";
+				trs+="<td>"+this.stPhone+"</td>";
+				trs+="<td>"+this.stArea+"</td>";
+				trs+="<td>"+(this.stStatus==0 ?'不可用':'可用')+"</td>";
+				trs+="<td>"+timeToDate(this.stTime)+"</td>";
+				trs+="<td>"+this.stCreateMan+"</td>";
+				trs+="<td>";
+				if(this.stStatus==1){
+					trs+="<a href='storageView.html?stId="+this.stId+"' class='tablelink'>查看详情 </a>"; 
+					trs+="<a href='storageUpdate.html?stId="+this.stId+"' class='tablelink'>修改 </a>"; 
+					trs+="<a href='javascript:void(0)' class='tablelink' onclick=tipOpen('是否确认注销此条信息？','"+this.stId+"','1')>注销 </a>"; 
+				}
+				if(this.stStatus==0){
+					trs+="<a href='storageView.html?stId="+this.stId+"' class='tablelink'>查看详情 </a>"; 
+					trs+="<a href='javascript:void(0)' class='tablelink' onclick=tipOpen('是否确认恢复此条信息？','"+this.stId+"','0')>恢复 </a>"; 
+				}
+				trs+="</td>";
+				trs+="</tr>";
+				i++;
+	    	});
+			$("tbody").html(trs);
+			$('.tablelist tbody tr:odd').addClass('odd');
+			pageButton();
+		}
+	});
+}
+
+//注销Storage仓库
+function cancelStorage(stId,stStatus){
+	$.ajax({
+		url:"cancelStorage.action",
+		data:{"stId":stId,"stStatus":stStatus},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			tipClose();
+			if(result==0){
+				alert("注销失败");
+			}else{
+				alert("注销成功");
+			}
+			window.location.href="storageList.html";
+			
+	    }	
+	});
+}
+
+//恢复Storage仓库
+function recoverStorage(stId,stStatus){
+	$.ajax({
+		url:"recoverStorage.action",
+		data:{"stId":stId,"stStatus":stStatus},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			tipClose();
+			if(result==0){
+				alert("恢复失败");
+			}else{
+				alert("恢复成功");
+				
+			}
+			window.location.href="storageList.html";
+	    }	
+	});
+}
+
+//查看详情
+function queryStorageById(){
+	var data=getUrlParam("stId");
+	$.ajax({
+		url:"queryStorageById.action",
+		data:{"stId":data},
+		async:false,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			$("#stName").text(result[0].stName);
+			$("#stAddress").text(result[0].stAddress);
+			$("#stArea").text(result[0].stArea);
+			$("#f_name").text(result[0].user.f_name);
+			$("#stPhone").text(result[0].stPhone);
+			$("#stContent").text(result[0].stContent);
+			if(result[0].stStatus==1){
+				$("#stStatus").text("可用");
+			}
+			if(result[0].stStatus==0){
+				$("#stStatus").text("不可用");
+			}
+			
+			$("#stCreateMan").text(result[0].stCreateMan);
+			$("#stTime").text(timeToDate(result[0].stTime));
+	    }	
+	});
+}
+
+//查询财务部仓库管理员
+function queryUserPosition(){
+	$.ajax({
+		url:"queryUserPosition.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value=''>请选择</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.f_z+"'>"+this.f_name+"</option>";
+			});
+			$("#stEmpId").html(str);
+	    }	
+	});
+}
+
+//添加仓库
+function addStorage(){
+	var data = $("#addForm").serialize();
+	$.ajax({
+		url:"addStorage.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			if(result==0){
+				alert("添加失败");
+				window.location.href="storageAdd.html";
+			}else{
+				alert("添加成功");
+				window.location.href="storageList.html";
+			}
+	    }	
+	
+	});
+}
+
+//修改仓库
+function updateStorage(){
+	var data = $("#updateForm").serialize();
+	$.ajax({
+		url:"updateStorage.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			if(result==0){
+				alert("修改失败");
+				window.location.href="storageUpdate.html";
+			}else{
+				alert("修改成功");
+				window.location.href="storageList.html";
+			}
+	    }	
+	
+	});
+}
+
+//修改的回选
+function queryByStId(){
+		var data=getUrlParam("stId");
+		$.ajax({
+			url:"queryByStId.action",
+			data:{"stId":data},
+			async:false,
+			dataType:"json",
+			type:"post",
+			success:function(result){
+				
+				$("#stName").val(result[0].stName);
+				$("#stAddress").val(result[0].stAddress);
+				
+				$("#ssid1").val(result[0].city.province.pro_name);
+				 selectCity1();
+				
+				$("#city1 option[value='"+result[0].city.city_id+"']").prop("selected",true);
+				$("#stEmpId option[value='"+result[0].user.f_z+"']").prop("selected",true);
+					
+				$("#stPhone").val(result[0].stPhone);
+				$("#stContent").val(result[0].stContent);
+				if(result[0].stStatus==1){
+					$("#stStatus").val("可用");
+				}
+				if(result[0].stStatus==0){
+					$("#stStatus").val("不可用");
+				}
+				
+				$("#stCreateMan").val(result[0].stCreateMan);
+				$("#stTime").val(timeToDate(result[0].stTime));
+				$("#stId").val(result[0].stId);
+		    }	
+		});
+	
+}
+
+
+
+
+
+///////////////////////////////////////////////仓库浏览 相关js////////////////////////////////////////////////////////////////////
+
+function queryStorageBrowse(){
+	var data = $("#selectForm").serialize();
+	$.ajax({
+		url:"queryStorageBrowse.action",
+		data:data,
+		async:false,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var i=1;
+			var trs = "";
+			$(result.list).each(function(){
+				trs+="<tr>";
+				trs+="<td>"+i+"</td>";
+				trs+="<td>"+this.stName+"</td>";
+				trs+="<td>"+this.user.f_name+"</td>";
+				trs+="<td>"+this.stPhone+"</td>";
+				trs+="<td>"+this.stArea+"</td>";
+				trs+="<td>"+(this.stStatus==0 ?'不可用':'可用')+"</td>";
+				trs+="<td>"+timeToDate(this.stTime)+"</td>";
+				trs+="<td>"+this.stCreateMan+"</td>";
+				trs+="<td>";
+					trs+="<a href='storageView.html?stId="+this.stId+"' class='tablelink'>查看详情 </a>"; 
+				trs+="</td>";
+				trs+="</tr>";
+				i++;
+	    	});
+			$("tbody").html(trs);
+			$('.tablelist tbody tr:odd').addClass('odd');
+			pageButton();
+		}
+	});
+}
+
+
+
+function queryUser(){
+	$.ajax({
+		url:"queryUser.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			user=result;
+			$("#stoMan").val(result.f_name);
+		}
+	});
+}

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.marketMapper.CustMapper">
+	<resultMap type="client" id="selectClientEndUser">
+		<id property="f_id" column="f_id"/>
+		<result property="f_name" column="f_name"/>
+		<result property="F_sex" column="F_sex"/>
+		<result property="f_tel" column="f_tel"/>
+		<result property="F_address" column="F_address"/>
+		<result property="F_view" column="F_view"/>
+		<result property="F_company" column="F_company"/>
+		<result property="F_city.city_id" column="F_city"/>
+		<result property="F_status" column="F_status"/>
+		<result property="F_isallot" column="F_isallot"/>
+		<result property="F_credate" column="F_credate"/>
+		<result property="F_creater" column="F_creater"/>
+		<result property="F_allotdate" column="F_allotdate"/>
+		<result property="ss" column="ss"/>
+		<association property="F_service" javaType="user">
+			<id property="f_id" column="F_service"/>
+			<result property="f_name" column="teename"/>
+		</association>
+	</resultMap>
+	<resultMap type="client" id="selectClientEndCity">
+		<id property="f_id" column="f_id"/>
+		<result property="f_name" column="f_name"/>
+		<result property="F_sex" column="F_sex"/>
+		<result property="f_tel" column="f_tel"/>
+		<result property="F_address" column="F_address"/>
+		<result property="F_view" column="F_view"/>
+		<result property="F_company" column="F_company"/>
+		<result property="F_service.f_id" column="F_service"/>
+		<result property="F_status" column="F_status"/>
+		<result property="F_isallot" column="F_isallot"/>
+		<result property="F_credate" column="F_credate"/>
+		<result property="F_creater" column="F_creater"/>
+		<result property="F_allotdate" column="F_allotdate"/>
+		<result property="ssid" column="ssid"/>
+		<result property="ss" column="ss"/>
+		<association property="F_city" javaType="city">
+			<id property="city_id" column="city_id"/>
+		</association>
+	</resultMap>
+	
+	
+	<sql id="mysql1">
+		<if test="f_company!=null and f_company!='' ">
+			and tec.f_company like '%' #{f_company} '%' 
+		</if>
+		<if test="f_name!=null and f_name!='' ">
+			and tec.f_name like  '%' #{f_name} '%' 
+		</if>
+		<if test="f_status!=null and f_status!='9' ">
+			and tec.f_status=#{f_status}
+		</if>
+		<if test="f_isallot!=null and f_isallot!='9' ">
+			and tec.f_isallot=#{f_isallot}
+		</if>
+	</sql>
+	<select id="cust_selectByPage" parameterType="client" resultMap="selectClientEndUser">
+		select c.*,ssss.ss from (
+			select tec.* from 
+			(select tcc.*,tee.f_name teename from t_client tcc left join t_emp tee on tcc.F_service=tee.f_id ) tec
+			<trim prefix="where" prefixOverrides="and">
+				<include refid="mysql1" />
+			</trim>
+		)c inner join (
+		select sss.ss,sss.id from (
+			SELECT CONCAT_WS("",p.pro_name,c.city_name) as ss,c.city_id id,p.pro_id sid FROM t_province p INNER JOIN t_city c on p.pro_id=c.pro_id
+			) sss
+			<trim prefix="where" prefixOverrides="and">
+				<if test="ssid!=null and ssid!='' ">
+						and sss.sid=#{ssid}
+				</if>
+				<if test="f_city!=null and f_city.city_id!='' ">
+						and sss.id=#{f_city.city_id}
+				</if>
+			</trim>
+		) ssss on ssss.id=c.F_city
+	</select>
+	
+	<select id="selectBySid" resultType="province">
+		select * from t_province
+	</select>
+	<select id="selectBySSid" parameterType="Integer" resultType="city">
+		select * from t_city where pro_id=#{ssid}
+	</select>
+	<select id="selectById" parameterType="client"  resultMap="selectClientEndCity">
+		select c.*,ssss.ss,ssss.id city_id,ssss.ssid from (
+			select * from t_client where f_id=#{f_id}
+		)c inner join (
+		select sss.ss,sss.id,sss.ssid from (
+			SELECT CONCAT_WS("",p.pro_name,c.city_name) as ss,c.city_id id,p.pro_id ssid FROM t_province p INNER JOIN t_city c on p.pro_id=c.pro_id
+			) sss
+		) ssss on ssss.id=c.F_city
+	</select>
+	<insert id="addClient" parameterType="client">
+		insert into t_client values(null,#{f_name},#{f_sex},#{f_tel},#{f_address},#{f_view},#{f_company},#{f_city.city_id},#{f_status},#{f_isallot},#{f_credate},#{f_creater},null,null)
+	</insert>
+	<update id="updateClient">
+		update t_client set f_name=#{f_name},f_sex=#{f_sex},f_tel=#{f_tel},f_address=#{f_address},f_view=#{f_view},f_company=#{f_company},f_city=#{f_city.city_id},f_status=#{f_status},f_isallot=#{f_isallot}
+		where f_id=#{f_id}
+	</update>
+	<update id="updateStatusClient">
+		update t_client set f_status=#{f_status} where f_id=#{f_id}
+	</update>
+	
+	<select id="selectAllpageBrowse" parameterType="client" resultMap="selectClientEndUser">
+		select c.*,ssss.ss from (
+			select tcl.* from 
+			(select tcc.*,tee.f_name teename from t_client tcc left join t_emp tee on tcc.F_service=tee.f_id where tcc.f_isallot='1' 
+				<if test="f_service.f_id!='1013' and f_service.f_id!='1001' ">
+					and tcc.F_service=#{f_service.f_id}
+				</if>
+			 ) tcl 
+			<trim prefix="where" prefixOverrides="and">
+				<if test="f_company!=null and f_company!='' ">
+					and f_company like '%' #{f_company} '%' 
+				</if>
+				<if test="f_name!=null and f_name!='' ">
+					and f_name like  '%' #{f_name} '%' 
+				</if>
+			</trim>
+		)c inner join (
+		select sss.ss,sss.id from (
+			SELECT CONCAT_WS("",p.pro_name,c.city_name) as ss,c.city_id id,p.pro_id sid FROM t_province p INNER JOIN t_city c on p.pro_id=c.pro_id
+			) sss
+			<trim prefix="where" prefixOverrides="and">
+				<if test="ssid!=null and ssid!='' ">
+						and sss.sid=#{ssid}
+				</if>
+				<if test="f_city!=null and f_city.city_id!='' ">
+						and sss.id=#{f_city.city_id}
+				</if>
+			</trim>
+		) ssss on ssss.id=c.F_city
+	</select>
+	
+	
+	<select id="selectPosition" resultType="position">
+   	select * from t_position where f_deptId='006' and f_name='组员' and F_status='1'
+   </select>
+   <select id="selectUserById" parameterType="user" resultType="user">
+   	SELECT * FROM t_emp e where e.F_positionid=#{f_positionid.f_id}
+   </select>
+   <update id="updateClientF_isallot" parameterType="order">
+   		update t_client set F_isallot=1,F_service=#{F_service.f_id},F_allotdate=SYSDATE() where f_id=#{f_id}
+   </update>
+</mapper>

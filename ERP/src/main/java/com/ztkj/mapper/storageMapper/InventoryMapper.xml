@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.ztkj.mapper.storageMapper.InventoryMapper">
+	
+	
+		<resultMap type="inventory" id="inventoryAndWare">
+			<id property="inId" column="inId"/>
+			<result property="inNum" column="inNum"/>
+			<association property="storage" javaType="storage">
+				<result property="stName" column="stName"/>
+			</association>
+			<association property="wares" javaType="wares">
+				<result property="brName" column="brName"/>
+				<result property="waName" column="waName"/>
+				<result property="waUnit" column="waUnit"/>
+				<result property="warestypeName" column="warestypeName"/>
+			</association>
+			<association property="firm" javaType="firm">
+				<result property="fiName" column="fiName"/>
+			</association>
+		</resultMap>
+		
+		<!-- 库存表的查询 -->
+		<select id="queryAllInventory" parameterType="inventory" resultMap="inventoryAndWare">
+			select inv.inId, st.stName,br.brName,wat.waName warestypeName,wa.waName,fi.fiName,inv.inNum,wa.waUnit from inventory inv left join storaget st on  inv.inStorageId=st.stId
+				left join wares wa on wa.waId=inv.reWaresId
+				left join brand br on br.brId=wa.waBrandid
+				left join warestype wat on wat.waId=wa.waWarestypeid
+				left join firm fi on inv.inFirmId=fi.fiId
+				<trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+				     <if test="stCreateMan!=null and stCreateMan!='' ">
+						and st.stCreateMan=#{stCreateMan}
+					 </if>
+					 <if test="storage!=null and storage.stName!='' and storage.stName!=null">
+					 	and stName like '%' #{storage.stName} '%'
+					 </if>
+					 <if test="wares!=null and wares.brName!='' and wares.brName!=null ">
+					 	and brName like '%' #{wares.brName} '%'
+					 </if>
+					 <if test="wares!=null and wares.warestypeName!='' and wares.warestypeName!=null ">
+					 	and wat.waName like '%' #{wares.warestypeName} '%'
+					 </if>
+					 <if test="wares!=null and wares.waName!='' and wares.waName!=null ">
+					 	and wa.waName like '%' #{wares.waName} '%'
+					 </if>
+				 </trim>
+				 
+		</select>
+		
+		
+		<!-- 查询出指定的库存相关 -->
+		<select id="queryByStoId" parameterType="Integer" resultType="detailed">
+			select br.brId,wa.waId,fi.fiId,de.deCount
+				from detailed de left join brand br on de.deBrid=br.brId
+				left join warestype wat on de.deWaTypeid=wat.waId
+				left join firm fi on de.deFiid=fi.fiId
+				left join wares wa on wa.waId=de.deWaid
+				left join purchase pu on de.puId=pu.puRealid
+				left join stock sto on sto.stPurchaseId=pu.puRealid
+				left join storaget st on st.stId=sto.stoStorageId
+				where sto.stoId=#{stoId}
+				
+		</select>
+		<!-- 查询出指定的库存相关的仓库 -->
+		<select id="queryStorageByStoId" parameterType="Integer" resultType="storage">
+			select st.stId from stock sto 
+				left join storaget st on st.stId=sto.stoStorageId
+				where sto.stoId=#{stoId}
+		</select>
+		
+		<!-- 查询出指定的库存相关编号 -->
+		<!-- <select id="queryStorageByStoId" parameterType="Integer" resultType="Integer">
+			select st.stId from stock sto 
+				left join storaget st on st.stId=sto.stoStorageId
+				where sto.stoId=#{stoId}
+		</select> -->
+	</mapper>

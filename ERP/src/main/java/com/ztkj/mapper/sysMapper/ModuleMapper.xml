@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.sysMapper.ModuleMapper">
+	<!-- 模糊查询 -->
+	<select id="queryAllModule" resultType="module">
+		select * from t_module
+		<where>
+			<if test="f_name!=null and f_name!=''">
+				and f_name like concat(concat('%',#{f_name}),'%')
+			</if>
+		</where>
+	</select>
+	<!-- 查询所有父模块 -->
+	<select id="queryAllFmodule" resultType="module">
+		select f_name from t_module where f_authId='无'
+	</select>
+	<!-- 查询一条数据 -->
+	<select id="queryOne" resultType="module">
+		select * from t_module where f_id=#{f_id}
+	</select>
+	<!-- 添加 -->
+	<select id="addModule" parameterType="module" resultType="Integer">
+		insert into t_module values(0,#{f_name},#{f_authId},#{f_url},1) 
+	</select>
+	<!-- 恢复 -->
+	<select id="recoverModuleStatus" parameterType="module" resultType="Integer">
+		update t_module
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=1
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 注销 -->
+	<select id="cancelModuleStatus" parameterType="module" resultType="Integer">
+		update t_module
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=0
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 修改 -->
+	<select id="updateModule" parameterType="module" resultType="Integer">
+		update t_module
+		<set>
+			<if test="f_name!=null and f_name!=''">
+				f_name=#{f_name},
+			</if>
+			<if test="f_authId!=null and f_authId!=''">
+				f_authId=#{f_authId},
+			</if>
+			<if test="f_url!=null and f_url!=''">
+				f_url=#{f_url}
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+</mapper>

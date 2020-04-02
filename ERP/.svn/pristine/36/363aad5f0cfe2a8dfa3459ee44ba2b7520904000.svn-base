@@ -1,0 +1,10 @@
+package com.ztkj.mapper.storageMapper;
+
+import java.util.List;
+
+import com.ztkj.entity.storage.Inventory;
+
+public interface InventoryMapper {
+
+	public List<Inventory>queryAllInventory( Inventory inventory);
+}

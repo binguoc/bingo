@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ztkj.mapper.storageMapper.DeliveryMapper">
+
+	<resultMap type="delivery" id="deliveryAndOrderAndStorage">
+		<id property="deId" column="deId"/>
+		<result property="deMan" column="deMan"/>
+		<result property="deStatic" column="deStatic"/>
+		<association property="order" javaType="order">
+			<id property="f_id" column="f_id"/>
+			<result property="f_Moneysum" column="f_Moneysum"/>
+			<result property="f_did" column="f_did"/>
+		</association>
+		<association property="storage" javaType="storage">
+			<id property="stId" column="stId"/>
+			<result property="stName" column="stName"/>
+			<result property="stTime" column="stTime"/>
+			<result property="stCreateMan" column="stCreateMan"/>
+		</association>
+	</resultMap>
+
+<!-- 模糊查询 -->
+		<select id="queryAllDelivery" parameterType="delivery" resultMap="deliveryAndOrderAndStorage">
+			select tor.f_did,tor.F_Moneysum,sto.stName,sto.stTime,sto.stCreateMan,de.deMan,de.deStatic,de.deId from delivery de left join 
+		    	  storaget sto on de.deStorageId=sto.stId left join t_order tor on de.deOrderId=tor.f_id
+		    	  
+		    	  <trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+					   <if test="storage!=null and storage.stName!=null and storage.stName!='' ">
+							 and stName like '%' #{storage.stName} '%'
+					   </if>
+						<if test="order!=null and order.f_did!=null  and order.f_did!=''  ">
+							and f_did like '%' #{order.f_did} '%'
+						</if>
+						<if test="deStatic!='-1' ">
+							and deStatic=#{deStatic}
+						</if>
+	      		  </trim>
+			       
+		</select>
+
+
+<!-- 操作修改状态方法 发货  取消订单  取消订单  确认退货 确认回款 -->	
+		<!-- <select id="updateDeliveryDeStatic" parameterType="delivery" resultType="Integer">
+			
+			<if test="(deStatic==0 and deMan=='发货')"> 
+				update delivery set deStatic=1 where deId=#{deId}
+			</if>
+			<if test="(deStatic==0 and deMan=='取消订单')"> 
+				update delivery set deStatic=3 where deId=#{deId}
+			</if>
+			<if test="(deStatic==1  and deMan=='取消订单')">
+				update delivery set deStatic=3 where deId=#{deId}
+			</if>
+			<if test="(deStatic==2  and deMan=='取消订单')">
+				update delivery set deStatic=3 where deId=#{deId}
+			</if>
+			<if test="(deStatic==3  and deMan=='确认已退货')">
+				update delivery set deStatic=4 where deId=#{deId}
+			</if>
+			<if test="(deStatic==1  and deMan=='确认回款')">
+				update delivery set deStatic=2 where deId=#{deId}
+			</if>
+			
+		</select> -->
+		
+		<select id="send" parameterType="delivery">
+			<if test="(deStatic==0 and deMan=='发货')"> 
+				update delivery set deStatic=1 where deId=#{deId}
+			</if>
+		</select>
+		
+		<select id="cancel" parameterType="delivery">
+			<if test="(deStatic==0 and deMan=='取消订单') or (deStatic==1  and deMan=='取消订单') or (deStatic==2  and deMan=='取消订单')"> 
+				update delivery set deStatic=3 where deId=#{deId}
+			</if>
+		</select>
+		<select id="moneyBack" parameterType="delivery">
+			<if test="(deStatic==1  and deMan=='确认回款')">
+				update delivery set deStatic=2 where deId=#{deId}
+			</if>
+		</select>
+		<select id="returnedGoods" parameterType="delivery">
+			<if test="(deStatic==3  and deMan=='确认已退货') or (deStatic==0 and deMan=='取消订单')">
+				update delivery set deStatic=4 where deId=#{deId}
+			</if>
+		</select>
+ 		
+		
+	
+		
+		
+		
+		<!--  查询通过审核的订单表-->
+		<select id="queryOrderIDStatic"  resultType="order">
+			select tor.f_did,tor.f_id from t_order tor where tor.f_did not in (select tor.f_did from t_order tor  right join delivery de on de.deOrderId=tor.f_id) and tor.F_status=3
+		</select>
+		
+		<!-- 查询所有的启用的仓库 -->
+		<select id="queryAllStorage" resultType="storage">
+			select st.stName,st.stId from storaget st where st.stStatus=1
+		</select>
+		
+		<!--  添加出库记录-->
+		<select id="addDelivery" parameterType="delivery" resultType="Integer">
+			insert into delivery values(null,#{order.f_id},#{storage.stId},#{deTime},#{deMan},#{deStatic})
+		</select>
+		
+		<resultMap type="delivery" id="deliveryAndOrder">
+			<id property="deId" column="deId"/>
+			<result property="deTime" column="deTime"/>
+			<result property="deStatic" column="deStatic"/>
+			<result property="deMan" column="deMan"/>
+			<association property="storage" javaType="storage">
+				<id property="stId" column="stId"/>
+				<result property="stName" column="stName"/>
+			</association>
+		</resultMap>
+		<!--查看详情  -->
+		<select id="queryByDid" parameterType="order" resultMap="deliveryAndOrder">
+			select sto.stname,sto.stId,de.deTime,de.deMan,de.deStatic from delivery de left join t_order tor on de.deOrderId=tor.f_id
+				left join storaget sto on de.deStorageId=sto.stId where tor.f_did=#{f_did}
+		</select>
+		
+		
+		
+		
+		
+		<!--查询出库详情的订单id  -->
+		<select id="queryDelivery" parameterType="Integer" resultType="String">
+			select tor.f_did from delivery de left join t_order tor on de.deOrderid=tor.f_id where de.deId=#{deId}
+		</select>
+		<!-- 根据订单号查询订单细节 -->	
+		<resultMap type="productdetail" id="productdetailAnddelivery">
+			<id property="f_id" column="f_id"/>
+			<result property="stId" column="stId"/>
+			<result property="f_count" column="f_count"/>
+			<association property="wares" javaType="wares">
+				<id property="waId" column="waId"/>
+			</association>
+			<association property="firm" javaType="firm">
+				<id property="fiId" column="f_firmId"/>
+			</association>
+		</resultMap>
+		<select id="queryProductdetail" parameterType="Integer" resultMap="productdetailAnddelivery">
+			select tp.f_count,tp.f_modelid waId,tp.f_firmid,de.deStorageId stId from t_productdetail tp left join t_order tor on tor.f_did=tp.f_did
+				left join  delivery de on de.deOrderId=tor.f_id where de.deId=#{deId}
+		</select>
+
+		
+		<!--发货  -->
+		<select id="sendGoods" parameterType="inventoryVo">
+				update inventory  set inNum=inNum-#{deCount} where inId=#{inId}
+		</select>
+		<!--退货  -->
+		<select id="revockGoods" parameterType="inventoryVo">
+				update inventory  set inNum=inNum+#{deCount} where inId=#{inId}
+		</select>
+</mapper>

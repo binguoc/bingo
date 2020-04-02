@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ztkj.mapper.sysMapper.LogMapper">
+    <!-- 查看日志详情 -->
+    <select id="queryLogView" parameterType="log"  resultType="log">
+          select * from t_logs where f_id = #{f_id}
+    </select>
+    <!-- 添加日志 -->
+    <insert id="addLog" parameterType="log">
+		insert into t_logs values(null,#{f_userId},#{f_userName},#{f_module},#{f_context},CURRENT_TIMESTAMP)
+	</insert>
+    <!-- 查询日志 -->
+    <select id="queryLog" parameterType="log"  resultType="log">
+		select * from t_logs ORDER BY f_time desc
+		<!-- 条件查询客户销量统计 -->
+		<trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+		      <!-- 员工编号条件查询 -->
+              <if test="f_userId!=null and f_userId!=''">
+                  f_userId = #{f_userId}
+              </if>
+              <!-- 员工姓名条件查询 -->
+              <if test="f_userName!=null and f_userName!=''">
+                  and f_userName like '%' #{f_userName} '%'
+              </if>
+              <!-- 日志内容模糊查询 -->
+              <if test="f_context!=null and f_context!=''">
+                  and f_context like '%' #{f_context} '%'
+              </if>
+              <!-- 操作模块模糊查询 -->
+              <if test="f_module!=null and f_module!=''">
+                  and f_module like '%' #{f_module} '%'
+              </if>
+              <!-- 日期时间查询 -->
+              <if test="startTime!=null and startTime!='' ">
+                  and f_time > #{startTime,jdbcType=DATE}
+              </if>
+              
+              <if test="endTime!=null and endTime!='' ">
+                  and f_time <![CDATA[<]]> #{endTime,jdbcType=DATE}
+              </if>
+        </trim>
+	</select>
+</mapper>

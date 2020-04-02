@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/jquery.js"></script>
+<script type="text/javascript" src="../../js/index.js"></script>
+<script type="text/javascript" src="../../js/market/customer.js"></script>
+<script type="text/javascript">
+$(function(){
+	toSheng();
+	var date=new Date();
+	$("input[name=F_credate]").val(timeToDate(date));
+});
+
+</script>
+</head>
+
+<body>
+<div class="place"> <span>位置：</span>
+  <ul class="placeul">
+    <li>营销管理</li>
+    <li>客户管理</li>
+    <li>添加</li>
+  </ul>
+</div>
+<form id="client">
+<div class="formbody">
+  <div class="formtitle"><span>客户信息</span></div>
+  <ul class="forminfo">
+    <li>
+      <label>姓名</label>
+      <input name="f_name" type="text" class="dfinput" />
+      <i>必填，不能超过30个字符</i>
+    </li>
+    <li>
+      <label>性别</label>
+      <cite>
+          <input name="F_sex" type="radio" value="1" checked="checked" />男
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <input name="F_sex" type="radio" value="2" />女
+      </cite>
+    </li>
+    <li>
+      <label>所属公司名称</label>
+      <input name="F_company" type="text" class="dfinput" />
+       <i>必填，不能超过30个字符</i>
+    </li>
+    <li>
+      <label>联系方式</label>
+      <input name="f_tel" type="text" class="dfinput" />
+       <i>必填，不能超过30个字符</i>
+    </li>
+    <li>
+      <label>联系地址</label>
+      <input name="F_address" type="text" class="dfinput" />
+       <i>必填，不能超过130个字符</i>
+    </li>
+    <li>
+      <label>所属区域</label>
+      <select class="dfselect" id="ssid" name="ssid" onclick="toCity()">
+      </select>
+      省
+      <select class="dfselect" id="city" name="F_city.city_id">
+      </select>
+      市
+      <i>必选</i>
+    </li>
+    <li>
+      <label>描述</label>
+      <textarea class="textinput" name="F_view"></textarea>
+      <i>可选</i>
+    </li>
+    <li>
+      <label>状态</label>
+      <select class="dfselect" name="F_status">
+          <option value="1">可用</option>
+          <option value="2">不可用</option>
+        </select>
+      <i>必选</i>
+    </li>
+    <li>
+      <label>创建人</label>
+      <input name="F_creater" type="text" value="柳思卿" readonly="readonly" class="roinput" />
+      <i>不能编辑</i>
+    </li>
+    <li>
+      <label>创建时间</label>
+      <input name="F_credate" type="date"  readonly="readonly" class="roinput" />
+      <i>不能编辑</i>
+    </li>
+    <li>
+      <label>&nbsp;</label>
+      <input name="" type="button" class="btn" value="确定"  onclick="addClient()"/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <input name="" type="button" class="btn" value="返回" onclick="window.location.href='customerList.html'"/>
+    </li>
+  </ul>
+</div>
+<input name="F_isallot" type="hidden" value="0" />
+</form>
+</body>
+</html>

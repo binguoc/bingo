@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客户管理</title>
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="../../laydate/laydate.js"></script>
+<script type="text/javascript" src="../../js/purchase/purchase.js"></script>
+<script type="text/javascript">
+function deltipOpen(obj) {
+	tds="";
+	tds+=" <input name='' type='button'  class='sure' value='确定' onclick='deletePurchase(\""+obj+"\")' />";
+    tds+="&nbsp;"
+     tds+="<input name='' type='button'  class='cancel' value='取消' onclick='deltipClose()' />"
+	$(".tipbtn").html(tds)
+	$("#deltip").fadeIn(200);
+}
+function deltipClose() {
+	$("#deltip").fadeOut(200);
+}
+function examinetipOpen(obj) {
+	$("input[name='puRealid']").val(obj);
+	queryAllAudut();
+	$("#examinetip").fadeIn(200);
+}
+
+function examinetipclose() {
+	$("#examinetip").fadeOut(200);
+}
+</script>
+
+<script type="text/javascript">
+	$(function(){
+		queryByPurchase();
+	});
+</script>
+</head>
+
+<body>
+<div class="place"> <span>位置：</span>
+  <ul class="placeul">
+    <li>采购管理</li>
+    <li>采购单管理</li>
+    <li>基本内容</li>
+  </ul>
+</div>
+<div class="rightinfo">
+  <form id="queryForm" method="post">
+  	<input type="hidden" name="pageNum" value="1"/>
+    <ul class="tools">
+      <li> 采购单编号:
+        <input type="text" name="id"/>
+      </li>
+      <li> 采购时间:
+      <input type="text" name="startTime" class="laydate-icon" id="logStartTime"/>-<input type="text" name="endTime" class="laydate-icon" id="logEndTime"/>
+      </li>
+      <li> 金额:
+        <input type="text" class="stinput" name="startMoney" />-<input type="text" class="stinput" name="endMoney"/>
+      </li>
+      <li> 审核状态：
+        <select name="status">
+          <option value="0">请选择</option>
+          <option value="1">未审核</option>
+          <option value="2">审核中</option>
+          <option value="3">审核通过</option>
+          <option value="4">审核未通过</option>
+        </select>
+      </li>
+      <li class="subBut" onclick="javascript:toPage(1)"><img src="../../images/t06.png" />查询</li>
+      <li class="subBut" onclick="window.location.href='purchaseAdd.html'"><img src="../../images/t01.png" />添加</li>
+    </ul>
+    <table class="tablelist">
+      <thead>
+        <tr>
+          <th>序号</th>
+          <th>采购单编号</th>
+          <th>采购时间</th>
+          <th>金额</th>
+          <th>操作人</th>
+          <th>审核状态</th>
+          <th>审核人</th>
+          <th>审核时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <div class="pagin">
+      <div class="message">共<i class="blue"></i>条记录，当前显示第&nbsp;<i class="blue">&nbsp;</i>页</div>
+     <ul class="paginList">
+     </ul>
+    </div>
+  </form>
+  <!-- 删除提示框 -->
+  <div id="deltip" class="tip">
+    <div class="tiptop"><span>提示信息</span><a onclick="deltipClose()"></a></div>
+    <div class="tipinfo"> <span><img src="../../images/ticon.png" /></span>
+      <div class="tipright">
+        <p>是否确认删除此条信息？</p>
+        <cite>如果是请点击确定按钮 ，否则请点取消。</cite> </div>
+    </div>
+    <div class="tipbtn">
+      <input name="" type="button"  class="sure" value="确定" onclick="deletePurchaese()" />
+      &nbsp;
+      <input name="" type="button"  class="cancel" value="取消" onclick="deltipClose()" />
+    </div>
+  </div>
+  
+  <!-- 审批提示框 -->
+  <div id="examinetip" class="tip">
+    <div class="tiptop">
+    	<span>提示信息</span><a onclick="examinetipclose()"></a>
+    </div>
+    <form id="updateForm">
+    <input type="hidden" name="puRealid"/>
+    <div class="tipinfo1"> 
+        部门：
+            <select class="dfselect">
+             	<option selected="selected">采购部</option>
+            </select>
+			<p/>
+            职位：
+            <select class="dfselect">
+            </select>
+   			<p/>
+            职位：
+            <select name="puUserid" class="dfselect">
+            </select>
+			<p/>
+    </div>
+    </form>
+    <div class="tipbtn">
+      <input name="" type="button"  class="sure" value="确定" onclick="updateStatusAndUser()" />
+      &nbsp;
+      <input name="" type="button"  class="cancel" value="取消" onclick="examinetipclose()" />
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+	$('.tablelist tbody tr:odd').addClass('odd');
+    var start = {
+      elem: '#logStartTime',
+      format: 'YYYY-MM-DD hh:mm:ss',
+      max: '2099-06-16', //最大日期
+      istime: true,
+      istoday: false,
+      choose: function(datas){
+        end.min = datas; //开始日选好后，重置结束日的最小日期
+        end.start = datas; //将结束日的初始值设定为开始日
+      }
+    };
+    var end = {
+      elem: '#logEndTime',
+      format: 'YYYY-MM-DD hh:mm:ss',
+      max: '2099-06-16',
+      istime: true,
+      istoday: false,
+      choose: function(datas){
+        start.max = datas; //结束日选好后，充值开始日的最大日期
+      }
+    };
+    laydate.skin('molv');//切换皮肤，请查看skins下面皮肤库
+    laydate(start);
+    laydate(end);
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.ztkj.mapper.statisMapper.SalesViewMapper">
+	     
+	     <select id="querySalesView"  parameterType="salesView"  resultType="salesView">
+	          select * from salesview_view where f_name=#{f_name}
+	     </select>
+	</mapper>

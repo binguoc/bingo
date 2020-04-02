@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.sysMapper.DeptMapper">
+	<!-- 模糊查询 -->
+	<select id="queryAllDept" resultType="dept">
+		select * from t_dept
+		<where>
+			<if test="f_name!=null and f_name!=''">
+				and f_name like concat(concat('%',#{f_name}),'%')
+			</if>
+		</where>
+	</select>
+	<!-- 查询一条数据 -->
+	<select id="queryOne" resultType="dept">
+		select * from t_dept where f_id=#{f_id}
+	</select>
+	<!-- 添加 -->
+	<select id="addDept" parameterType="dept" resultType="Integer">
+		insert into t_dept values(#{f_id},#{f_name},1) 
+	</select>
+	<!-- 恢复 -->
+	<select id="recoverDeptStatus" parameterType="dept" resultType="Integer">
+		update t_dept
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=1
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 注销 -->
+	<select id="cancelDeptStatus" parameterType="dept" resultType="Integer">
+		update t_dept
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=0
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 修改 -->
+	<select id="updateDept" parameterType="dept" resultType="Integer">
+		update t_dept
+		<set>
+			<if test="f_name!=null and f_name!=''">
+				f_name=#{f_name}
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+</mapper>

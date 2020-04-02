@@ -1,0 +1,250 @@
+package com.ztkj.controller.purchaseController;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.purchase.Brand;
+import com.ztkj.entity.purchase.Detailed;
+import com.ztkj.entity.purchase.Firm;
+import com.ztkj.entity.purchase.PuAndDeVo;
+import com.ztkj.entity.purchase.Purchase;
+import com.ztkj.entity.purchase.PurchaseAudutVo;
+import com.ztkj.entity.purchase.PurchaseVo;
+import com.ztkj.entity.purchase.Wares;
+import com.ztkj.entity.purchase.Warestype;
+import com.ztkj.entity.sys.User;
+import com.ztkj.service.purchaseService.PurchaseService;
+
+@Controller
+@RequestMapping("/purchase/purchase")
+public class PurchaseController {
+	@Resource(name = "purchaseService")
+	private PurchaseService purchaseService;
+
+	public User queryUser(HttpServletRequest request) {
+		User user=new User();
+		try {
+			HttpSession session = request.getSession();
+			user = (User) session.getAttribute("loginUser");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return user;
+	}
+
+	
+	@RequestMapping("/queryByPurchase.action")
+	@ResponseBody
+	public PageInfo<PurchaseVo> queryByPurchase(PurchaseVo purchaseVo) {
+		PageInfo<PurchaseVo> pageInfo = null;
+		try {
+			pageInfo = purchaseService.queryByPurchase(purchaseVo);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return pageInfo;
+	}
+
+	@RequestMapping("/queryByOnePuAndDeVo.action")
+	@ResponseBody
+	public PuAndDeVo queryByOnePuAndDeVo(String puRealid) {
+		PuAndDeVo vo=new PuAndDeVo();
+		try {
+			Purchase purchase = purchaseService.queryByOnePurchase(puRealid);
+			List<Detailed> list = purchaseService.queryByOneDetailed(puRealid);
+			vo.setPurchase(purchase);
+			vo.setDeList(list);
+		} catch (Exception e) { 
+			// TODO Auto-generated catch block e.printStackTrace();
+		}
+		return vo;
+	}
+	
+	
+
+	@RequestMapping("/deletePurchase.action")
+	@ResponseBody
+	public void deletePurchase(String puRealid) {
+		try {
+			purchaseService.deletePurchase(puRealid);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@RequestMapping("/queryByAllBrname.action")
+	@ResponseBody
+	public List<Brand> queryAllBrname() {
+		List<Brand> list = new ArrayList<Brand>();
+		try {
+			list = purchaseService.queryAllBrname();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@RequestMapping("/queryMaxId.action")
+	@ResponseBody
+	public Purchase queryMaxId(HttpServletRequest request) {
+		Purchase purchase = null;
+		User user = queryUser(request);
+		try {
+			purchase = new Purchase();
+			String dateTime=purchase.getNewTime();
+			int maxId = purchaseService.queryMaxId(dateTime)+1;
+			String id=null;
+			int numberOfid = String.valueOf(maxId).length();
+			switch(numberOfid) {
+				case 1:
+					id="000"+maxId;
+					break;
+				case 2:
+					id="00"+maxId;
+					break;
+				case 3:
+					id="0"+maxId;
+					break;
+				case 4:
+					id=""+maxId;
+					break;
+			}
+			purchase.setPuRealid("CG" + purchase.getNewTime() + id);
+			purchase.setPuTime(new Date());
+			purchase.setPuUserid(user.getF_name());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return purchase;
+	}
+
+	@RequestMapping("/queryNameid.action")
+	@ResponseBody
+	public User queryNameid(HttpServletRequest request) {
+		User user = new User();
+		User user2 = queryUser(request);
+		try {
+			user = purchaseService.queryNameid(user2.getF_name());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
+
+	@RequestMapping("/queryByAllTypename.action")
+	@ResponseBody
+	public List<Warestype> queryByAllTypename(Integer brId) {
+		List<Warestype> list = new ArrayList<Warestype>();
+		try {
+			list = purchaseService.queryByAllTypename(brId);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@RequestMapping("/queryByAllWaname.action")
+	@ResponseBody
+	public List<Wares> queryByAllWaname(Integer waWarestypeid) {
+		List<Wares> list = new ArrayList<Wares>();
+		try {
+			list = purchaseService.queryByAllWaname(waWarestypeid);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@RequestMapping("/queryByAllFiname.action")
+	@ResponseBody
+	public List<Firm> queryByAllFiname() {
+		List<Firm> list = new ArrayList<Firm>();
+		try {
+			list = purchaseService.queryByAllFiname();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@RequestMapping("/addPurchase.action")
+	@ResponseBody
+	public void addPurchase(Purchase purchase) {
+		try {
+			purchaseService.addPurchase(purchase);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@RequestMapping("/addDetailed.action")
+ 	@ResponseBody
+	public void addDetailed(PuAndDeVo vo) {
+		try {
+			purchaseService.addDetailed(vo.getDeList());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@RequestMapping("/updateDetailed.action")
+	@ResponseBody
+	public void updateDetailed(PuAndDeVo vo) {
+		try {
+			purchaseService.deleteDetailed(vo.getPurchase());
+			purchaseService.updatePurchase(vo.getPurchase());
+			purchaseService.addDetailed(vo.getDeList());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@RequestMapping("/queryAllAudut.action")
+	@ResponseBody
+	public List<PurchaseAudutVo> queryAllAudut() {
+		List<PurchaseAudutVo> vo=new ArrayList<PurchaseAudutVo>();
+		try {
+			vo=purchaseService.queryAllAudut();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return vo;
+	}
+	
+	@RequestMapping("/queryAllUser.action")
+	@ResponseBody
+	public List<PurchaseAudutVo> queryAllUser(PurchaseAudutVo userVo) {
+		List<PurchaseAudutVo> vo=new ArrayList<PurchaseAudutVo>();
+		try {
+			vo=purchaseService.queryAllUser(userVo);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return vo;
+	}
+	
+	@RequestMapping("/updateStatusAndUser.action")
+	@ResponseBody
+	public void updateStatusAndUser(Purchase purchase) {
+		try {
+			purchaseService.updateStatusAndUser(purchase);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+}

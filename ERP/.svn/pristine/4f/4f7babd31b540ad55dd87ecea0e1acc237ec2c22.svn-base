@@ -1,0 +1,57 @@
+package com.ztkj.mapper.marketMapper;
+
+import java.util.List;
+
+import com.ztkj.entity.market.Client;
+import com.ztkj.entity.market.Order;
+import com.ztkj.entity.market.Productdetail;
+import com.ztkj.entity.market.ProductdetailVO;
+import com.ztkj.entity.purchase.Brand;
+import com.ztkj.entity.purchase.Firm;
+import com.ztkj.entity.purchase.Wares;
+import com.ztkj.entity.purchase.Warestype;
+import com.ztkj.entity.sys.Position;
+import com.ztkj.entity.sys.User;
+
+public interface OrderMapper {
+
+	List<Order> selectByPage(Order order);
+
+	List<Client> selectAllClient();
+
+	List<Brand> selectAllBrand();
+
+
+	List<Warestype> selectAllWarestype(Integer brId);
+
+	List<Wares> selectAllWares(Integer waId);
+
+	List<Firm> selectAllFirm(Integer waId);
+
+	void addProductdetail(ProductdetailVO pVo);
+
+	void addOrder(Order order);
+
+	Order selectById(Order order);
+
+	List<Productdetail> selectDalByDId(Productdetail productdetail);
+
+	void updateProductdetail(ProductdetailVO pVo);
+	void deleteProductdetail(ProductdetailVO pVo);
+	void addProductdetail2(ProductdetailVO pVo);
+
+	void deleteProductdetailByDid(Order order);
+
+	void deleteOrder(Order order);
+
+	List<Order> selectAllOrderExaminee(Order order);
+
+	void updateOrderExamine(Order order);
+
+	List<Position> selectPosition();
+
+	List<User> selectUserById(User user);
+
+	void updateOrderStatus(Order order);
+	
+}

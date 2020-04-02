@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.login.LoginMapper">
+	<resultMap type="user" id="userAndDeptAndPositionMap">
+		<id property="f_z" column="f_z"/>
+		<result property="f_id" column="f_id"/>
+		<result property="f_name" column="f_name"/>
+		<result property="f_password" column="f_password"/>
+		<result property="f_tel" column="f_tel"/>
+		<result property="f_birthday" column="f_birthday"/>
+		<result property="f_status" column="f_status"/>
+		<result property="f_jointime" column="f_jointime"/>
+		<result property="f_leavetime" column="f_leavetime"/>
+		<result property="f_sex" column="f_sex"/>
+		<association property="f_positionid" resultMap="positionMap" />
+	</resultMap>
+	<resultMap type="position" id="positionMap">
+		<id column="pid" property="f_id"/>
+		<result column="pname" property="f_name"/>
+		<association property="dept" javaType="dept">
+			<id property="f_id" column="did"/>
+			<result property="f_name" column="dname"/>
+		</association>
+	</resultMap>
+	<select id="LoginUser" parameterType="user" resultMap="userAndDeptAndPositionMap">
+		select t1.*,t2.f_id pid,t2.f_name pname,
+		t3.f_id did,t3.f_name dname 
+		from t_emp t1 left join t_position t2 
+		on t1.F_positionid=t2.f_id left join t_dept t3 
+		on t2.f_deptId=t3.f_id where t1.f_id=#{f_id} and t1.f_password=#{f_password} and t1.F_status='1'
+	</select>
+	<select id="LoginUserF_id" parameterType="user" resultType="user">
+		select t1.f_id from t_emp t1 where t1.f_id=#{f_id} and t1.F_status='1'
+	</select>
+</mapper>

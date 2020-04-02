@@ -1,0 +1,526 @@
+var page;
+var user;
+function selectAllpage(){
+	queryUser();
+	var data = $("#selectForm").serialize();
+	$.ajax({
+		url:"order_selectByPage.action",
+		data:data,
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="";
+			page = result;
+			var i=1;
+			$(result.list).each(function(){
+				str+="<tr>";
+				str+="<td>"+i+"</td>";
+				str+="<td>"+this.f_did+"</td>";
+				str+="<td>"+this.client.f_name+"</td>";
+				str+="<td>"+this.client.f_tel+"</td>";
+				str+="<td>"+this.f_company+"</td>";
+				str+="<td>"+this.f_Moneysum+"</td>";
+				str+="<td>"+this.f_dpeople.f_name+"</td>";
+				str+="<td>"+(this.f_status==1?"未审核":(this.f_status==2?"审核中":(this.f_status==3?"审核通过":"审核不通过")))+"</td>";
+				str+="<td>"+(this.f_auditor==null?"":this.f_auditor.f_name)+"</td>";
+				str+="<td>"+(this.f_date==null?"":this.time)+"</td>";
+				str+="<td>";
+				if (user.f_positionid.f_id!=10) {
+					if(this.f_status==1) {
+						str+="<a href='orderView.html?id="+this.f_did+"' class='tablelink'>查看详情</a>&nbsp;&nbsp;";
+						str+="<a href='orderUpdate.html?id="+this.f_did+"' class='tablelink'>修改</a>&nbsp;&nbsp;";
+						str+="<a href='javascript:void(0);' class='tablelink' onclick=deltipOpen('是否确认删除"+this.f_did+"？','"+this.f_did+"')>删除</a>&nbsp;&nbsp;";
+						str+="<a href='javascript:void(0);' class='tablelink' onclick='examinetipOpen("+this.f_id+")'>提交审核</a>";
+					} else if(this.f_status==2) {
+						str+="<a href='orderView.html?id="+this.f_did+"' class='tablelink'>查看详情</a>";
+					} else if(this.f_status==3) {
+						str+="<a href='orderView.html?id="+this.f_did+"' class='tablelink'>查看详情</a>&nbsp;&nbsp;";
+						str+="<a href='../../storage/delivery/deliveryView.html?id="+this.f_did+"' class='tablelink'>出库详情</a>";
+					} else{
+						str+="<a href='orderUpdate.html?id="+this.f_did+"' class='tablelink'>修改</a>&nbsp;&nbsp;";
+						str+="<a href='javascript:void(0);' class='tablelink' onclick='examinetipOpen()'>提交审核</a>";
+					}
+				} else {
+						$(".subBut:eq(1)").remove();
+						str+="<a href='orderView.html?id="+this.f_did+"' class='tablelink'>查看详情</a>&nbsp;&nbsp;";
+						if(this.f_status==3) {
+							str+="<a href='../../storage/delivery/deliveryView.html?id="+this.f_did+"' class='tablelink'>出库详情</a>";
+						}
+				}
+				str+="</td>";
+				str+="</tr>";
+				i++;
+			});
+			$("tbody").html(str);
+			pageButton();
+		}
+	});
+}
+function selectAllOrderExamine(){
+	var data = $("#selectForm").serialize();
+	$.ajax({
+		url:"order_selectAllOrderExaminee.action",
+		data:data,
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="";
+			page = result;
+			var i=1;
+			$(result.list).each(function(){
+				str+="<tr>";
+				str+="<td>"+i+"</td>";
+				str+="<td>"+this.f_did+"</td>";
+				str+="<td>"+this.client.f_name+"</td>";
+				str+="<td>"+this.client.f_tel+"</td>";
+				str+="<td>"+this.f_company+"</td>";
+				str+="<td>"+this.f_Moneysum+"</td>";
+				str+="<td>"+this.f_dpeople.f_name+"</td>";
+				str+="<td>"+(this.f_status==1?"未审核":(this.f_status==2?"审核中":(this.f_status==3?"审核通过":"审核不通过")))+"</td>";
+				str+="<td>";
+				str+="<a href='orderExamine.html?id="+this.f_did+"' class='tablelink'>审核</a>";
+				str+="</td>";
+				str+="</tr>";
+				i++;
+			});
+			$("tbody").html(str);
+			pageButton();
+		}
+	});
+}
+
+var dalNum=0;
+function addDal() {
+	dalNum++;
+	var str="<tr>";
+	str+="<td>"+(dalNum+1)+"<input type='hidden' name='list["+dalNum+"].order.f_did' value='"+$("#order").val()+"'/></td>";
+	str+="<td><select class='brand' onchange='selectAllWarestype("+dalNum+")'>"+$(".brand:eq(0)").html()+"</select></td>";
+	str+="<td><select class='warestype' onchange='selectAllWares("+dalNum+")'' ><option>请选择</option></select></td>";
+	str+="<td><select class='wares' name='list["+dalNum+"].wares.waId'  onchange='selectAllFirm("+dalNum+")'><option>请选择</option></select></td>";
+	str+="<td><select class='firm' name='list["+dalNum+"].firm.fiId' onblur='toYan("+dalNum+")' ><option>请选择</option></select></td>";
+	str+="<td><input type='number' class='count' name='list["+dalNum+"].f_count' onblur='autoSum("+dalNum+")'/></td>";
+	str+="<td><input type='text' name='list["+dalNum+"].f_status' value='台' readonly='readonly'/></td>";
+	str+="<td><input type='number' class='auditor' name='list["+dalNum+"].f_auditor' onblur='autoSum("+dalNum+")'/></td>";
+	str+="<td><input type='text' class='SumMoney' name='list["+dalNum+"].f_Money' readonly='readonly'/></td>";
+	str+="</tr>";
+	$(".tablelist tbody").append(str);
+	if (dalNum-1==-1) {
+		selectAllBrand();
+	}
+}
+function delDal() {
+	if (dalNum-1>-1) {
+		$(".tablelist tbody tr").last().remove();
+		dalNum--;
+		autoSum(0);
+		}
+}
+
+
+
+function selectAllClient(){
+	$.ajax({
+		url:"order_selectAllClient.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value='' >-请选择-</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.f_id+"' >"+this.f_name+"</option>";
+			});
+			$("#client").html(str);
+		}
+	});
+}
+function selectAllBrand(){
+	$.ajax({
+		url:"order_selectAllBrand.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value='' >-请选择-</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.brId+"' >"+this.brName+"</option>";
+			});
+			$(".brand:eq(0)").html(str);
+		}
+	});
+}
+function selectAllWarestype(v){
+	var brId=$(".brand:eq("+v+")").val();
+	$.ajax({
+		url:"order_selectAllWarestype.action",
+		data:{"brId":brId},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value='' >-请选择-</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.waId+"' >"+this.waName+"</option>";
+			});
+			$(".warestype:eq("+v+")").html(str);
+		}
+	});
+}
+function selectAllWares(v){
+	var waId=$(".warestype:eq("+v+")").val();
+	$.ajax({
+		url:"order_selectAllWares.action",
+		data:{"waId":waId},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value='' >-请选择-</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.waId+"' >"+this.waName+"</option>";
+			});
+			$(".wares:eq("+v+")").html(str);
+		}
+	});
+}
+function selectAllFirm(v){
+	var waId=$(".wares:eq("+v+")").val();
+	$.ajax({
+		url:"order_selectAllFirm.action",
+		data:{"waId":waId},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value='' >-请选择-</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.fiId+"' >"+this.fiName+"</option>";
+			});
+			$(".firm:eq("+v+")").html(str);
+		}
+	});
+}
+
+
+
+
+
+//用同步方法取代
+/*function addOrder() {
+	var data = $("#data").serialize();
+	$.ajax({
+		url:"order_addOrder.action",
+		data:data,
+		dataType:"json",
+		async:true,
+		type:"post",
+		success:function(result){
+			if(result==true){
+				alert("添加成功！");
+				addProductdetail();
+			}else{
+				alert("添加失败！请重新添加！！！");
+			}
+			
+		}
+	});
+}*/
+
+
+
+function selectPosition() {
+	$.ajax({
+		url:"order_selectPosition.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="";
+			$(result).each(function(){
+				str+="<option value='"+this.f_id+"' >"+this.f_name+"</option>";
+			});
+			$("#position").html(str);
+			selectUserById();
+		}
+	});
+}
+function selectUserById() {
+	var waId=$("#position").val();
+	$.ajax({
+		url:"order_selectUserById.action",
+		data:{"f_positionid.f_id":waId},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="<option value='' >-请选择-</option>";
+			$(result).each(function(){
+				str+="<option value='"+this.f_id+"' >"+this.f_name+"</option>";
+			});
+			$("#user").html(str);
+		}
+	});
+}
+
+function updateOrderStatus() {
+	var data = $("#data").serialize();
+	$.ajax({
+		url:"order_updateOrderStatus.action",
+		data:data,
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			examinetipclose();
+			if(result==true){
+				selectAllpage();
+			}else{
+				alert("提交审核失败！请重新提交审核！！！");
+			}
+			
+		}
+	});
+}
+
+
+function addProductdetail() {
+	if (toYanFirm()&&autoNumYan()) {
+		var data = $("#data").serialize();
+		$.ajax({
+			url:"order_addProductdetail.action",
+			data:data,
+			dataType:"json",
+			async:false,
+			type:"post",
+			success:function(result){
+				if(result==true){
+					window.location.href="orderList.html";
+				}else{
+					alert("添加失败！请重新添加！！！");
+				}
+				
+			}
+		});
+	}
+}
+
+var vv=0;
+function autoSum(v) {
+	vv=v;
+	var count=$(".count:eq("+v+")").val();
+	var auditor=$(".auditor:eq("+v+")").val();
+	if (count<0) {
+		$(".count:eq("+v+")").focus();
+	}else if(auditor<0){
+		$(".auditor:eq("+v+")").focus();
+	}else {
+		if (count!=null&&auditor!=null) {
+			var SumMoney=count*auditor;
+			$(".SumMoney:eq("+v+")").val(SumMoney);
+			var sum=0;
+			$(".SumMoney").each(function(){
+				var c=$(this).val();
+				sum+=Number(c);
+			});
+			$("#f_Moneysum").val(sum);
+		}
+	}
+}
+function autoNumYan() {
+	var v=vv;
+	var count=$(".count:eq("+v+")").val();
+	var auditor=$(".auditor:eq("+v+")").val();
+	var i=0;
+	if (count<0) {
+		$(".count:eq("+v+")").focus();
+		i++;
+	}else if(auditor<0){
+		$(".auditor:eq("+v+")").focus();
+		i++;
+	}
+	if (i!=0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+function updateOrderExamine() {
+	var data = $("#data").serialize();
+	if ($("select[name=f_status]").val()==0) {
+		alert("审核状态未选择！！！");
+	}else {
+		$.ajax({
+			url:"order_updateOrderExamine.action",
+			data:data,
+			dataType:"json",
+			async:false,
+			type:"post",
+			success:function(result){
+				if(result==true){
+					window.location.href="orderExamineList.html";
+				}else{
+					alert("审核失败！请重新审核！！！");
+				}
+				
+			}
+		});
+	}
+}
+
+
+
+function selectById() {
+	$.ajax({
+		url:"order_selectById.action",
+		data:{"f_did":getUrlParam("id")},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			$("cite:eq(0)").html(result.f_did);
+			var t="<a href='../../market/customer/customerView.html?f_id="+result.client.f_id+"' title='点击查看客户详细信息' class='tablelink'>"+result.client.f_name+"</a>";
+			$("cite:eq(1)").html(t);
+			$("cite:eq(2)").html(result.client.f_tel);
+			$("cite:eq(3)").html(result.f_company);
+			$("cite:eq(4)").html("￥"+result.f_Moneysum);
+			$("cite:eq(5)").html(result.f_dpeople.f_name);
+			$("cite:eq(6)").html((result.f_status==1?"未审核":(result.f_status==2?"审核中":(result.f_status==3?"审核通过":"审核不通过"))));
+			$("cite:eq(7)").html(result.f_view);
+			$("cite:eq(8)").html((result.f_auditor==null?"":result.f_auditor.f_name));
+			$("cite:eq(9)").html((result.f_date==null?"":result.f_date));
+			$("input[name=f_id]").val(result.f_id);
+			selectDalByDId(result.f_did);
+		}
+	});
+}
+function selectDalByDId(f_did) {
+	$.ajax({
+		url:"order_selectDalByDId.action",
+		data:{"order.f_did":f_did},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="";
+			var i=1;
+			$(result).each(function(){
+				str+="<tr>";
+				str+="<td>"+i+"</td>";
+				str+="<td>"+this.logo+"</td>";
+				str+="<td>"+this.type+"</td>";
+				str+="<td>"+(this.wares==null?"":this.wares.waName)+"</td>";
+				str+="<td>"+(this.firm==null?"":this.firm.fiName)+"</td>";
+				str+="<td>"+this.f_count+"</td>";
+				str+="<td>"+this.f_status+"</td>";
+				str+="<td>"+this.f_auditor+"</td>";
+				str+="<td>"+this.f_Money+"</td>";
+				str+="</tr>";
+				i++;
+			});
+			$(".tablelist tbody").html(str);
+		}
+	});
+}
+
+function queryUser(){
+	$.ajax({
+		url:"queryUser.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			user=result;
+			$("#f_name").val(result.f_name);
+			$("#f_id").val(result.f_id);
+		}
+	});
+}
+
+
+function deleteOrder(){
+	var data = $("#data2").serialize();
+	$.ajax({
+		url:"order_deleteOrder.action",
+		data:data,
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			deltipClose();
+			if(result==true){
+				selectAllpage();
+			}else{
+				alert("删除失败！");
+			}
+		}
+	});
+}
+
+function toYan(v) {
+	var waresid=$(".wares:eq("+v+")").val();
+	var firmid=$(".firm:eq("+v+")").val();
+	for (var i = 0; i < v; i++) {
+		var waresid1=$(".wares:eq("+i+")").val();
+		var firmid1=$(".firm:eq("+i+")").val();
+		if (waresid1==waresid && firmid1==firmid) {
+			$(".tablelist tbody tr:eq("+v+")").last().remove();
+			dalNum--;
+			alert("上面有相同厂商的产品,前往修改数据即可");
+			$(".count:eq("+i+")").focus();
+		}
+	}
+}
+
+function toYanFirm() {
+	var i=0;
+	$(".firm").each(function() {
+		var firmid=$(this).val();
+		if (firmid==null||firmid=="") {
+			$(this).focus();
+			i++;
+		}
+	});
+	if (i!=0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function timeToDate() {
+    var d = new Date();//时间戳记得乘以1000再进行处理
+    var year = d.getFullYear();
+    var month = d.getMonth()+1;
+    var date = d.getDate();
+    var hour = d.getHours();
+    var minute = d.getMinutes();
+    var second = d.getSeconds();
+    month=month<10?"0"+month:month;
+    date=date<10?"0"+date:date;
+    huor=hour<10?"0"+hour:hour;
+    minute=minute<10?"0"+minute:minute;
+    second=second<10?"0"+second:second;
+    var timeToDate=year + "-" + month + "-" + date+" "+huor+":"+minute+":"+second;
+    return timeToDate;
+}
+function toDid() {
+	var d = new Date();//时间戳记得乘以1000再进行处理
+	var year = d.getFullYear();
+	var month = d.getMonth()+1;
+	var date = d.getDate();
+	var hour = d.getHours();
+	var minute = d.getMinutes();
+	var second = d.getSeconds();
+	month=month<10?"0"+month:month;
+	date=date<10?"0"+date:date;
+	huor=hour<10?"0"+hour:hour;
+	minute=minute<10?"0"+minute:minute;
+	second=second<10?"0"+second:second;
+	return "DJ"+year + "" + month + "" + date+""+huor+""+minute+""+second;
+}
+function getUrlParam(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    if (r != null) return unescape(r[2]); return null; //返回参数值
+}

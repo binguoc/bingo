@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客户管理</title>
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/jquery.js"></script>
+<script type="text/javascript" src="../../js/index.js"></script>
+<script type="text/javascript" src="../../js/market/customer.js"></script>
+<script type="text/javascript">
+$(function(){
+	toSheng();
+	selectAllpage();
+	selectPosition();
+	$('.tablelist tbody tr:odd').addClass('odd');
+});
+function toPage(pageNow){
+	$("input[name='pageNum']").val(pageNow);
+	selectAllpage();
+}
+function tipOpen(content,ZXid,valo) {
+	$(".tipright p").text(content);
+	$("#ZXid").val(ZXid);
+	$("#valo").val(valo);
+	$("#tip").fadeIn(200);
+}
+function tipClose() {
+	$("#tip").fadeOut(200);
+}
+function allottipOpen(f_id) {
+	$("#data #f_id").val(f_id);
+	$("#allottip").fadeIn(200);
+}
+function allottipclose() {
+	$("#allottip").fadeOut(200);
+}
+</script>
+</head>
+
+<body>
+<div class="place"> <span>位置：</span>
+  <ul class="placeul">
+    <li>营销管理</li>
+    <li>客户管理</li>
+    <li>基本内容</li>
+  </ul>
+</div>
+<div class="rightinfo">
+  <form id="selectForm">
+  	<input type="hidden" name="pageNum" />
+    <ul class="tools">
+      <li> 公司名称:
+        <input type="text" size="12" name="F_company"/>
+      </li>
+      <li> 客户姓名:
+        <input type="text" size="12" name="f_name"/>
+      </li>
+      <li> 所属区域：
+        <select id="ssid" name="ssid" onclick="toCity()">
+        </select>
+        <select id="city" name="F_city.city_id">
+        	<option value=''>请选择城市</option>
+        </select>
+      </li>
+      <li> 状态：
+        <select name="F_status">
+          <option value="9">请选择     </option>
+          <option value="1">可用</option>
+          <option value="2">不可用</option>
+        </select>
+      </li>
+      <li> 是否分配：
+        <select name="F_isallot">
+          <option value="9">请选择     </option>
+          <option value="1">已分配</option>
+          <option value="0">未分配</option>
+        </select>
+      </li>
+      <li class="subBut" onclick="toPage(1)"><img src="../../images/t06.png" />查询</li>
+      <li class="subBut" onclick="window.location.href='customerAdd.html'"><img src="../../images/t01.png" />添加</li>
+    </ul>
+    <table class="tablelist">
+      <thead>
+        <tr>
+          <th>序号</th>
+          <th>客户姓名</th>
+          <th>性别</th>
+          <th>联系电话</th>
+          <th>所属公司</th>
+          <th>所属区域</th>
+          <th>状态</th>
+          <th>创建时间</th>
+          <th>创建人</th>
+          <th>分配时间</th>
+          <th>客户人员</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <div class="pagin">
+      <div class="message"></div>
+      <ul class="paginList">
+      </ul>
+    </div>
+  </form>
+  <!-- 提示框 -->
+  <div id="tip" class="tip">
+  	<input type="hidden" id="ZXid" />
+  	<input type="hidden" id="valo" />
+    <div class="tiptop"><span>提示信息</span><a onclick="tipClose()"></a></div>
+    <div class="tipinfo"> <span><img src="../../images/ticon.png" /></span>
+      <div class="tipright">
+        <p></p>
+        <cite>如果是请点击确定按钮 ，否则请点取消。</cite> </div>
+    </div>
+    <div class="tipbtn">
+      <input name="" type="button"  class="sure" value="确定" onclick="updateStatusClient()" />
+      &nbsp;
+      <input name="" type="button"  class="cancel" value="取消" onclick="tipClose()" />
+    </div>
+  </div>
+  <!-- 审批提示框 -->
+  <div id="allottip" class="tip">
+  <form id="data">
+  <input type="hidden" name="f_id" id="f_id"/>
+    <div class="tiptop">
+    	<span>提示信息</span><a onclick="allottipclose()"></a>
+    </div>
+    <div class="tipinfo1"> 
+    	
+        部门：
+            <input type="text" class="dfselect" readonly="readonly" value="市场部"/>
+			<p/>
+            职位：
+            <select class="dfselect" id="position" >
+            	
+            </select>
+   			<p/>
+            姓名：
+            <select class="dfselect" name="F_service.f_id" id="user">
+            </select>
+			<p/>
+    </div>
+    <div class="tipbtn">
+      <input name="" type="button"  class="sure" value="确定" onclick="updateClientF_isallot()" />
+      &nbsp;
+      <input name="" type="button"  class="cancel" value="取消" onclick="allottipclose()" />
+    </div>
+  </form>
+  </div>
+</div>
+</body>
+</html>

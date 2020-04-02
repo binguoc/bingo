@@ -1,0 +1,51 @@
+package com.ztkj.service.statisService.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.market.City;
+import com.ztkj.entity.market.Province;
+import com.ztkj.entity.statis.Sales;
+import com.ztkj.mapper.statisMapper.SalesMapper;
+import com.ztkj.service.statisService.SalesService;
+
+@Service("salesService")
+@Transactional
+public class SalesServiceImpl implements SalesService {
+    
+	@Autowired
+	private SalesMapper salesMapper;
+	
+	@Override
+	public List<Province> selectProvince() throws Exception {
+		// TODO Auto-generated method stub
+		List<Province> list = salesMapper.selectProvince();
+		return list;
+	}
+
+	@Override
+	public List<City> selectCity(String pro_id) throws Exception {
+		// TODO Auto-generated method stub
+		List<City> list = salesMapper.selectCity(pro_id);
+		return list;
+	}
+
+	@Override
+	@Transactional(readOnly=true)
+	public PageInfo<Sales> selectSales(Integer pageNum,Sales sales) throws Exception {
+		// TODO Auto-generated method stub
+		pageNum = pageNum==null ? 1:pageNum;
+		Integer pageSize = 5;
+		//分页的插件，专门用于MyBatis的分页插件
+		PageHelper.startPage(pageNum, pageSize);
+		List<Sales> list = salesMapper.selectSales(sales);
+		PageInfo<Sales> pageInfo = new PageInfo<Sales>(list);
+		return pageInfo;
+	}
+
+}

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ztkj.mapper.statisMapper.StockStatisMapper">
+    <!-- 分页查询入库统计 --> 
+     <select id="queryStockStatis" parameterType="stockStatis"  resultType="stockStatis">
+		select * from stock_view
+		<!-- 条件查询入库统计 -->
+		<trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+		      <!-- 省份条件查询 -->
+              <if test="pro_name!='-1'">
+                  pro_id = #{pro_name}
+              </if>
+              <!-- 城市条件查询 -->
+              <if test="city_name!='-1' and city_name!=null and city_name!=''">
+                  and city_name = #{city_name}
+              </if>
+              <!-- 仓库名模糊查询 -->
+              <if test="f_kName!=null and f_kName!=''">
+                  and f_kName like '%' #{f_kName} '%'
+              </if>
+              <!-- 日期时间查询 -->
+              <if test="startTime!=null and startTime!='' ">
+                  and f_time > #{startTime,jdbcType=DATE}
+              </if>
+              
+              <if test="endTime!=null and endTime!='' ">
+                  and f_time <![CDATA[<]]> #{endTime,jdbcType=DATE}
+              </if>
+        </trim>
+	</select>
+	
+</mapper>	

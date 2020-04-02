@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.purchaseMapper.FirmMapper">
+	<select id="queryAllProvince" resultType="province">
+		select * from t_province
+	</select>
+	<select id="queryAllCityByProId" parameterType="province" resultType="city">
+		select * from t_city where pro_id=#{pro_id}
+	</select>
+	<select id="queryAllFirmByPage" parameterType="firm" resultType="firm">
+		select f.*,CONCAT(p.pro_name,c.city_name ) fiProvinceCity ,e.f_name fiCreateUserName 
+			from firm f,t_province p,t_city c,t_emp e
+				where f.fiAddressProvince=p.pro_id 
+						and f.fiAddressCity=c.city_id 
+							and f.fiCreateUserid=e.f_id
+							<if test="fiName!=null and fiName!=''">
+								and fiName like '%${fiName}%'
+							</if>
+							<if test="fiDirectorUserName!=null and fiDirectorUserName!=''">
+								and fiDirectorUserName like '%${fiDirectorUserName}%'
+							
+							</if>
+							<if test="fiAddressProvince!=null and fiAddressProvince!=''">
+								and fiAddressProvince =#{fiAddressProvince}
+							</if>
+							<if test="fiAddressCity!=null and fiAddressCity!=''">
+								and fiAddressCity=#{fiAddressCity}
+							</if>
+							<if test="fiStatus!=null">
+								and fiStatus=#{fiStatus}
+							</if>
+	</select>
+	
+	<select id="queryFirmById" parameterType="firm" resultType="firm">
+		select f.*,CONCAT(p.pro_name,c.city_name ) fiProvinceCity ,e.f_name fiCreateUserName 
+			from firm f,t_province p,t_city c,t_emp e
+				where  f.fiAddressProvince=p.pro_id 
+						and f.fiAddressCity=c.city_id 
+							and f.fiCreateUserid=e.f_id
+							and fiId=#{fiId}
+	</select>
+	
+	<update id="updateFirm" parameterType="firm">
+		update firm 
+		<set>
+			<if test="fiName!=null and fiName!=''">
+				fiName=#{fiName},
+			</if>
+			<if test="fiDirectorUserName!=null and fiDirectorUserName!=''">
+				fiDirectorUserName=#{fiDirectorUserName},
+			</if>
+			<if test="fiPhone!=null and fiPhone!=''">
+				fiPhone=#{fiPhone},
+			</if>
+			<if test="fiRealAddress!=null and fiRealAddress!=''">
+				fiRealAddress=#{fiRealAddress},
+			</if>
+			<if test="fiAddressProvince!=null">
+				fiAddressProvince=#{fiAddressProvince},
+			</if>
+			<if test="fiAddressCity!=null">
+				fiAddressCity=#{fiAddressCity},
+			</if>
+<!-- 			<if test="fiDescribe!=null and fiDescribe!=''"> -->
+				fiDescribe=#{fiDescribe},
+<!-- 			</if> -->
+			<if test="fiStatus!=null">
+				fiStatus=#{fiStatus},
+			</if>
+		</set>
+		 where  fiId=#{fiId}
+	</update>
+	
+	<insert id="addFirm" parameterType="firm">
+	insert into firm values(null,#{fiName},#{fiDirectorUserName},
+		#{fiPhone},#{fiRealAddress},#{fiAddressProvince},#{fiAddressCity},
+			#{fiStatus},#{fiCreatetime},#{fiDescribe},#{fiCreateUserid})
+	</insert>
+	
+</mapper>

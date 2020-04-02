@@ -1,0 +1,47 @@
+package com.ztkj.mapper.storageMapper;
+
+import java.util.List;
+
+import com.ztkj.entity.market.Order;
+import com.ztkj.entity.market.Productdetail;
+import com.ztkj.entity.storage.Delivery;
+import com.ztkj.entity.storage.Inventory;
+import com.ztkj.entity.storage.InventoryVo;
+import com.ztkj.entity.storage.Storage;
+
+public interface DeliveryMapper {
+
+	public List<Delivery> queryAllDelivery( Delivery delivery) ;
+
+	public Integer updateDeliveryDeStatic(Delivery delivery);
+
+	public List<Order> queryOrderIDStatic();
+
+	public List<Storage> queryAllStorage(Storage storage);
+
+	public Integer addDelivery(Delivery delivery);
+
+	public List<Delivery> queryByDid(Order order);
+
+	public String queryDelivery(Integer deId);
+
+	public List<Productdetail> queryProductdetail(Integer deId);
+
+	public List<Delivery> queryDeliveryIDS();
+
+	public List<Inventory> queryInventoryAnd();
+
+	public void sendGoods(InventoryVo inventoryVo);
+
+	public void revockGoods(InventoryVo inventoryVo);
+
+	public void send(Delivery delivery);
+
+	public void cancel(Delivery delivery);
+
+	public void moneyBack(Delivery delivery);
+
+	public void returnedGoods(Delivery delivery);
+
+	
+}

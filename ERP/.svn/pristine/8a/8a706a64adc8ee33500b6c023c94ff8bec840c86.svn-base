@@ -1,0 +1,65 @@
+package com.ztkj.service.storageService.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.purchase.Purchase;
+import com.ztkj.entity.storage.Stock;
+import com.ztkj.entity.storage.Storage;
+import com.ztkj.mapper.storageMapper.StockMapper;
+import com.ztkj.service.storageService.StockService;
+
+@Service("stockService")
+public class StockServiceImpl implements StockService {
+
+	@Autowired
+	private StockMapper stockMapper;
+/**
+ * 分页查询所有的入库信息
+ * @return
+ */	
+	@Override 
+	public PageInfo<Stock> queryAllStock(Integer pageNum,Stock stock) throws Exception {
+		pageNum = pageNum==null ? 1 : pageNum;
+		Integer pageSize = 3;
+		PageHelper.startPage(pageNum, pageSize);//分页插件，专门用于myBatis分页
+		List<Stock> list = stockMapper.queryAllStock(stock);
+		PageInfo<Stock> pageInfo = new PageInfo<Stock>(list);
+		return pageInfo;
+	}
+	
+	@Override
+	public Integer updateStatic(Stock stock)throws Exception{
+		Integer updateStatic = stockMapper.updateStatic(stock);
+		return updateStatic;
+	}
+
+	@Override
+	public List<Storage> queryAllStorage() throws Exception {
+		 List<Storage> list = stockMapper.queryAllStorage();
+		return list;
+	}
+
+	@Override
+	public List<Purchase> queryAllPurchase() throws Exception {
+		 List<Purchase> list = stockMapper.queryAllPurchase();
+		return list;
+	}
+	
+	@Override
+	public Integer addStock(Stock stock) throws Exception {
+		/* stockMapper.updateStock(stock); */
+		Integer addStock = stockMapper.addStock(stock);
+		System.out.println("111");
+		System.out.println(addStock);
+		  return addStock;
+	}
+
+	
+
+	
+}

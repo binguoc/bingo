@@ -1,0 +1,231 @@
+var page;
+var user;
+function toPage(value){
+	$("input[name=pageNum]").val(value);//每次点击查询按钮，当前页初始化为1
+	queryAllStock();//按条件分页查询，显示数据
+}
+/**
+ * 时间转换函数
+ * 毫秒----->年月日
+ * @param second
+ * @returns
+ */
+function timeToDate(data) {
+    var d = new Date(data);//时间戳记得乘以1000再进行处理
+    var year = d.getFullYear();
+    var month = d.getMonth()+1;
+    var date = d.getDate();
+    var hour = d.getHours();
+    var minute = d.getMinutes();
+    var second = d.getSeconds();
+    return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
+}
+
+
+function tipOpen(content,stoId,stoStatic) {
+	if(stoStatic==0){
+		$(".sure").attr("onclick","recoverStatic('"+stoId+"','"+stoStatic+"')");
+	}else{
+		$(".sure").attr("onclick","cancelStatic('"+stoId+"','"+stoStatic+"')");
+	}
+	$(".tipright p").text(content);
+	$("#tip").fadeIn(200);
+}
+function tipClose() {
+	$("#tip").fadeOut(200);
+}
+
+
+
+
+
+function queryAllStock(){
+	var data = $("#selectForm").serialize();
+	queryUser();
+	$.ajax({
+		url:"queryAllStock.action",
+		data:data,
+		async:false,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var i=1;
+			var trs = "";
+			$(result.list).each(function(){
+				trs+="<tr>";
+				trs+="<td>"+i+"</td>";
+				trs+="<td>"+this.purchase.puRealid+"</td>";
+				trs+="<td>"+format(this.purchase.puTotalmoney)+"</td>";
+				trs+="<td>"+(this.storage==null?"":this.storage.stName)+"</td>";
+				trs+="<td>"+timeToDate(this.stoTime)+"</td>";
+				trs+="<td>"+this.stoMan+"</td>";
+				trs+="<td>"+(this.stoStatic==0 ?'未入库':'入库')+"</td>";
+				trs+="<td>";
+				if (user.f_positionid.f_id!=7) {
+					if(this.stoStatic==0){
+						trs+="<a href='stockView.html?puRealid="+this.purchase.puRealid+"' class='tablelink'>查看详情 </a>"; 
+						trs+="<a href='javascript:void(0)' class='tablelink' onclick=tipOpen('确定此采购单入库吗？','"+this.stoId +"','0')>入库 </a>"; 
+					}
+					if(this.stoStatic==1){
+						trs+="<a href='stockView.html?puRealid="+this.purchase.puRealid+"' class='tablelink'>查看详情 </a>"; 
+						trs+="<a href='javascript:void(0)' class='tablelink' onclick=tipOpen('确定取消此采购单入库吗？','"+this.stoId+"','1')>取消入库 </a>"; 
+					}
+				}else{
+					$("#add1").remove();
+					trs+="<a href='stockView.html?puRealid="+this.purchase.puRealid+"' class='tablelink'>查看详情 </a>"; 
+				}
+				trs+="</td>";
+				trs+="</tr>";
+				i++;
+	    	});
+			$("tbody").html(trs);
+			$('.tablelist tbody tr:odd').addClass('odd');
+			pageButton();
+		}
+	});
+}
+
+//入库
+function recoverStatic(stoId,stoStatic){
+	$.ajax({
+		url:"recoverStatic.action",
+		data:{"stoId":stoId,"stoStatic":stoStatic},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			tipClose();
+			queryAllStock();
+	    }	
+	});
+}
+
+//取消入库
+function cancelStatic(stoId,stoStatic){
+	$.ajax({
+		url:"cancelStatic.action",
+		data:{"stoId":stoId,"stoStatic":stoStatic},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			tipClose();
+			queryAllStock();
+	    }	
+	});
+}
+
+//入库与取消入库操作
+function updateStatic(stoId,stoStatic){
+	$.ajax({
+		url:"updateStatic.action",
+		data:{"stoId":stoId,"stoStatic":stoStatic},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			/*if(stoStatic==0){
+				if(result==0){
+					alert("入库失败");
+				}else{
+					alert("入库成功");
+				}
+			}else{
+				if(result==0){
+					alert("入库失败");
+				}else{
+					alert("入库成功");
+				}
+			}
+			
+			tipClose();
+			queryAllStock();*/
+	    }	
+	});
+}
+
+//查询所有的仓库
+function queryAllStorage(){
+	$.ajax({
+		url:"queryAllStorage.action",
+		async:false,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var options = "";
+			$(result).each(function(){
+				options += "<option value="+this.stId+">"+this.stName +"</option>";
+			}); 
+			$(".dfselect:last").html(options);
+		}
+	});
+}
+
+//查询所有审核通过的采购单
+function queryAllPurchase(){
+	$.ajax({
+		url:"queryAllPurchase.action",
+		async:false,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var options = "";
+			$(result).each(function(){
+				options += "<option>"+this.puRealid +"</option>";
+			}); 
+			$(".dfselect:first").html(options);
+		}
+	});
+}
+
+//添加入库信息
+function addStock(){
+	var data = $("#addForm").serialize();
+	$.ajax({
+		url:"addStock.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			if(result==0){
+				alert("添加入库失败");
+			}else{
+				alert("添加入库成功");
+			}
+			window.location.href="stockList.html";
+		}
+	});
+}
+
+
+//采购详情+入库信息
+function queryByPuRealid(){
+	$.ajax({
+		url:"queryByPuRealid.action",
+		data:{"puRealid":getUrlParam("puRealid")},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			var t="<a href='../storage/storageView.html?stId="+(result[0].storage==null?'':result[0].storage.stId)+"' title='点击查看客户详细信息' class='tablelink'>"+(result[0].storage==null?'':result[0].storage.stName)+"</a>";
+			$(".forminfo li:eq(8) cite").html(t);
+			$(".forminfo li:eq(9) cite").html(timeToDate(result[0].stoTime));
+			$(".forminfo li:eq(10) cite").html(result[0].stoMan);
+			$(".forminfo li:eq(11) cite").html((result[0].stoStatic==0?"未入库":"已入库"));
+		}
+	});
+}
+
+
+
+function queryUser(){
+	$.ajax({
+		url:"queryUser.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			user=result;
+			$("#stoMan").val(result.f_name);
+		}
+	});
+}

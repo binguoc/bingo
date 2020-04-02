@@ -1,0 +1,35 @@
+package com.ztkj.test;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.ztkj.entity.market.TestBean;
+import com.ztkj.service.marketService.TestService;
+import com.ztkj.tools.MyDateConvert;
+public class Test1 {
+	@Test
+	public void Test() {
+		ApplicationContext context=new ClassPathXmlApplicationContext("applicationContext-service.xml","applicationContext-dao.xml");
+		TestService testService =(TestService) context.getBean("testService");
+		try {
+			List<TestBean> selectTest = testService.selectTest();
+			for (TestBean testBean : selectTest) {
+				System.out.println(testBean);
+			}
+		} catch (Exception e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+		}
+	}
+	@Test
+	public void Test2() {
+		Date date=new Date();
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		System.out.println(date);
+	}
+}

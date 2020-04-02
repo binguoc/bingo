@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客户管理</title>
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/jquery.js"></script>
+<script type="text/javascript" src="../../js/index.js"></script>
+<script type="text/javascript" src="../../js/market/customer.js"></script>
+<script type="text/javascript">
+$(function(){
+	toSheng();
+	selectAllpageBrowse();
+	$('.tablelist tbody tr:odd').addClass('odd');
+});
+function toPage(pageNow){
+	$("input[name='pageNum']").val(pageNow);
+	selectAllpageBrowse();
+}
+function tipOpen(content) {
+	$(".tipright p").text(content);
+	$("#tip").fadeIn(200);
+}
+function tipClose() {
+	$("#tip").fadeOut(200);
+}
+</script>
+</head>
+
+<body>
+<div class="place"> <span>位置：</span>
+  <ul class="placeul">
+    <li>营销管理</li>
+    <li>客户浏览</li>
+    <li>基本内容</li>
+  </ul>
+</div>
+<div class="rightinfo">
+  <form id="selectForm">
+  	<input type="hidden" name="pageNum" />
+    <ul class="tools">
+      <li> 公司名称:
+        <input type="text" size="12" name="F_company"/>
+      </li>
+      <li> 客户姓名:
+        <input type="text" size="12" name="f_name"/>
+      </li>
+      <li> 所属区域：
+        <select id="ssid" name="ssid" onclick="toCity()">
+        </select>
+        <select id="city" name="F_city.city_id">
+        	<option value=''>请选择城市</option>
+        </select>
+      </li>
+      <li class="subBut" onclick="toPage(1)"><img src="../../images/t06.png" />查询</li>
+    </ul>
+    <table class="tablelist">
+      <thead>
+        <tr>
+          <th>序号</th>
+          <th>客户姓名</th>
+          <th>性别</th>
+          <th>联系电话</th>
+          <th>所属公司</th>
+          <th>所属区域</th>
+          <th>分配时间</th>
+          <th>客服人员</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <div class="pagin">
+      <div class="message">共<i class="blue">1256</i>条记录，当前显示第&nbsp;<i class="blue">2&nbsp;</i>页</div>
+      <ul class="paginList">
+        
+      </ul>
+    </div>
+  </form>
+</div>
+<script type="text/javascript">
+	$('.tablelist tbody tr:odd').addClass('odd');
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.sysMapper.UserMapper">
+	<resultMap type="user" id="userAndDeptAndPositionMap">
+		<id property="f_z" column="f_z"/>
+		<result property="f_id" column="f_id"/>
+		<result property="f_name" column="f_name"/>
+		<result property="f_password" column="f_password"/>
+		<result property="f_tel" column="f_tel"/>
+		<result property="f_birthday" column="f_birthday"/>
+		<result property="f_status" column="f_status"/>
+		<result property="f_jointime" column="f_jointime"/>
+		<result property="f_leavetime" column="f_leavetime"/>
+		<result property="f_sex" column="f_sex"/>
+		<association property="f_positionid" resultMap="positionMap" />
+	</resultMap>
+	<resultMap type="position" id="positionMap">
+		<id column="pid" property="f_id"/>
+		<result column="pname" property="f_name"/>
+		<association property="dept" javaType="dept">
+			<id property="f_id" column="did"/>
+			<result property="f_name" column="dname"/>
+		</association>
+	</resultMap>
+	<!-- 模糊查询 -->
+	<select id="queryAllUser" resultMap="userAndDeptAndPositionMap">
+		select t1.*,t2.f_id pid,t2.f_name pname,
+		t3.f_id did,t3.f_name dname 
+		from t_emp t1 left join t_position t2 
+		on t1.F_positionid=t2.f_id left join t_dept t3 
+		on t2.f_deptId=t3.f_id
+        <trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+        	 <if test="f_id!=null and f_id!=''">
+				and t1.f_id like concat(concat('%',#{f_id}),'%')
+			 </if>
+			 <if test="f_name!=null and f_name!=''">
+				and t1.f_name like concat(concat('%',#{f_name}),'%')
+			 </if>
+			 <if test="f_positionid!=null and f_positionid.dept.f_id!=null and f_positionid.dept.f_id!=''">
+				and t3.f_id=#{f_positionid.dept.f_id}
+			 </if>
+			 <if test="f_status!=null and f_status!=''">
+				and t1.f_status=#{f_status}
+			 </if>
+		</trim>
+	</select>
+	<!-- 查询单条 -->
+	<select id="queryOne" resultMap="userAndDeptAndPositionMap">
+		select t1.*,t2.f_id pid,t2.f_name pname,
+		t3.f_id did,t3.f_name dname 
+		from t_emp t1 left join t_position t2 
+		on t1.F_positionid=t2.f_id left join t_dept t3 
+		on t2.f_deptId=t3.f_id
+		where t1.f_z=#{f_z}
+	</select>
+	<!-- 修改 -->
+	<select id="updateUser" parameterType="user" resultType="Integer">
+		update t_emp
+		<set>
+			<if test="f_id!=null and f_id!=''">
+				f_id=#{f_id},
+			</if>
+			<if test="f_name!=null and f_name!=''">
+				f_name=#{f_name},
+			</if>
+			<if test="f_password!=null and f_password!=''">
+				f_password=#{f_password},
+			</if>
+			<if test="f_tel!=null and f_tel!=''">
+				f_tel=#{f_tel},
+			</if>
+			<if test="f_sex!=null and f_sex!=''">
+				f_sex=#{f_sex},
+			</if>
+			<if test="f_status!=null and f_status!=''">
+				f_status=#{f_status},
+			</if>
+			<if test="f_birthday!=null and f_birthday!=''">
+				f_birthday=#{f_birthday},
+			</if>
+			<if test="f_positionid!=null and f_positionid.f_id!=null and f_positionid.f_id!=''">
+				f_positionid=#{f_positionid.f_id}
+			</if>
+		</set>
+		<where>
+			<if test="f_z!=null">
+				f_z=#{f_z}
+			</if>
+		</where>
+	</select>
+	<!-- 查询所有部门 -->
+	<select id="queryAllDept" resultType="dept">
+		select * from t_dept where f_status=1
+	</select>
+	<!-- 查询部门对应的职位 -->
+	<select id="queryPosition" parameterType="user" resultType="position" >
+		select f_id,f_name from t_position where f_deptid=#{f_positionid.dept.f_id} and f_status=1
+	</select>
+	<!-- 添加 -->
+	<select id="addUser" parameterType="user" resultType="Integer">
+		insert into t_emp values(#{f_id},#{f_name},#{f_password},#{f_tel},#{f_positionid.f_id},#{f_birthday},1,now(),null,#{f_sex},0) 
+	</select>
+	<!-- 重置密码 -->
+	<select id="updateUserPwd" parameterType="user" resultType="Integer">
+		update t_emp set f_password='123' where f_z=#{f_z}
+	</select>
+	<!-- 恢复 -->
+	<select id="recoverUserStatus" parameterType="user" resultType="Integer">
+		update t_emp
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=1,f_leavetime=null
+			</if>
+		</set>
+		<where>
+			<if test="f_z!=null">
+				f_z=#{f_z}
+			</if>
+		</where>
+	</select>
+	<!-- 注销 -->
+	<select id="cancelUserStatus" parameterType="user" resultType="Integer">
+		update t_emp
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=0,f_leavetime=now()
+			</if>
+		</set>
+		<where>
+			<if test="f_z!=null">
+				f_z=#{f_z}
+			</if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,131 @@
+package com.ztkj.service.purchaseService.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.purchase.Brand;
+import com.ztkj.entity.purchase.Detailed;
+import com.ztkj.entity.purchase.Firm;
+import com.ztkj.entity.purchase.PuAndDeVo;
+import com.ztkj.entity.purchase.Purchase;
+import com.ztkj.entity.purchase.PurchaseVo;
+import com.ztkj.entity.purchase.Wares;
+import com.ztkj.entity.purchase.Warestype;
+import com.ztkj.entity.sys.User;
+import com.ztkj.mapper.purchaseMapper.PurchaseMapper;
+import com.ztkj.service.purchaseService.PurchaseService;
+
+@Service("purchaseService")
+public class PurchaseServiceimpl implements PurchaseService {
+	@Autowired
+	private PurchaseMapper purchaseMapper;
+	
+	@Override
+	public PageInfo<PurchaseVo> queryByPurchase(PurchaseVo purchaseVo) throws Exception {
+		// TODO Auto-generated method stub
+		Integer pageSize=4;
+		//分页插件，专门用于MyBatis的分页插件
+			PageHelper.startPage(purchaseVo.getPageNum(),pageSize);
+			List<PurchaseVo> list = purchaseMapper.queryByPurchase(purchaseVo);
+		PageInfo<PurchaseVo> pageInfo=new PageInfo<PurchaseVo>(list);
+		return pageInfo;
+	}
+
+	@Override
+	public Purchase queryByOnePurchase(String puRealid) throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryByOnePurchase(puRealid);
+	}
+
+	@Override
+	public List<Detailed> queryByOneDetailed(String puRealid) throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryByOneDetailed(puRealid);
+	}
+
+	@Override
+	public void deletePurchase(String puRealid) throws Exception {
+		// TODO Auto-generated method stub
+		purchaseMapper.deletePurchase(puRealid);
+	}
+
+	@Override
+	public List<Brand> queryAllBrname() throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryAllBrname();
+	}
+
+	@Override
+	public int queryMaxId() throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryMaxId();
+	}
+
+	@Override
+	public List<Warestype> queryByAllTypename(Integer brId) throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryByAllTypename(brId);
+	}
+
+	@Override
+	public List<Wares> queryByAllWaname(Integer waWarestypeid) throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryByAllWaname(waWarestypeid);
+	}
+
+	@Override
+	public List<Firm> queryByAllFiname() throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryByAllFiname();
+	}
+
+	@Override
+	public void addPurchase(Purchase purchase) throws Exception {
+		// TODO Auto-generated method stub
+		purchaseMapper.addPurchase(purchase);
+	}
+
+	@Override
+	public void addDetailed(List<Detailed> list) throws Exception {
+		// TODO Auto-generated method stub
+		
+		for (Detailed detailed : list) {
+			purchaseMapper.addDetailed(detailed);
+		}
+	}
+
+	@Override
+	public User queryNameid(String userName) throws Exception {
+		// TODO Auto-generated method stub
+		return purchaseMapper.queryNameid(userName);
+	}
+
+	@Override
+	public void updateDetailed(List<Detailed> list) throws Exception {
+		// TODO Auto-generated method stub
+		for (Detailed detailed : list) {
+			purchaseMapper.updateDetailed(detailed);
+		}
+	}
+
+	@Override
+	public PageInfo<PurchaseVo> queryStatus(PurchaseVo vo)throws Exception {
+		// TODO Auto-generated method stub
+		Integer pageSize=4;
+		//分页插件，专门用于MyBatis的分页插件
+			PageHelper.startPage(vo.getPageNum(),pageSize) ;
+			List<PurchaseVo> list = purchaseMapper.queryStatus(vo);
+		PageInfo<PurchaseVo> pageInfo=new PageInfo<PurchaseVo>(list);
+		return pageInfo;
+	}
+
+	@Override
+	public void updateStatus(Purchase purchase) throws Exception {
+		// TODO Auto-generated method stub
+		purchaseMapper.updateStatus(purchase);
+	}
+}

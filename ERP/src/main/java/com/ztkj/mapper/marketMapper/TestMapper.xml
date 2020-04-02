@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.marketMapper.TestMapper">
+	<select id="selectTest" resultType="testBean">
+		SELECT CONCAT_WS("",tp.pro_name,tc.city_name) AS ss FROM t_province tp LEFT JOIN t_city tc on tp.pro_id=tc.pro_id
+	</select>
+</mapper>

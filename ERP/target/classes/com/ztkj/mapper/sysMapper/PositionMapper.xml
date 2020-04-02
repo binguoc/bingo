@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.sysMapper.PositionMapper">
+	<resultMap type="position" id="positionAndDeptMap">
+		<id property="f_id" column="f_id"/>
+		<result property="f_name" column="f_name"/>
+		<result property="f_status" column="f_status"/>
+		
+		<association property="dept" javaType="dept">
+			<id property="f_id" column="did"/>
+			<result property="f_name" column="dname"/>
+		</association>
+		
+		<association property="position" javaType="position">
+			<id property="f_id" column="lvid"/>
+			<result property="f_name" column="lvname"/>
+		</association>
+	</resultMap>
+	<!-- 模糊查询 -->
+	<select id="queryAllPosition" resultMap="positionAndDeptMap">
+		select t1.f_id,t1.f_name,t1.f_status,
+		t2.f_id did,t2.f_name dname,t3.f_id lvid,t3.f_name lvname 
+		from t_position t1
+        left join t_dept t2 on t1.f_deptid = t2.f_id
+        left join t_position t3 on t1.f_positionid = t3.f_id
+        <trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+			 <if test="f_name!=null and f_name!=''">
+				and t1.f_name like concat(concat('%',#{f_name}),'%')
+			 </if>
+			 <if test="dept!=null and dept.f_id!=null and dept.f_id!=''">
+				and t2.f_id=#{dept.f_id}
+			</if>
+		</trim>
+	</select>
+	<!-- 查询单条 -->
+	<select id="queryOne" resultMap="positionAndDeptMap">
+		select t1.f_id,t1.f_name,t1.f_status,
+		t2.f_id did,t2.f_name dname,t3.f_id lvid,t3.f_name lvname 
+		from t_position t1
+        left join t_dept t2 on t1.f_deptid = t2.f_id
+        left join t_position t3 on t1.f_positionid = t3.f_id
+        where t1.f_id=#{f_id}
+	</select>
+	<!-- 查询所有部门 -->
+	<select id="queryAllDept" resultType="dept">
+		select * from t_dept where f_status=1
+	</select>
+	<!-- 查询部门对应的职位 -->
+	<select id="queryPosition" parameterType="position" resultMap="positionAndDeptMap" >
+		select f_id,f_name from t_position where f_deptid=#{dept.f_id} and f_status=1 and f_name!='组员' or f_name='总经理'
+	</select>
+	<!-- 添加 -->
+	<select id="addPosition" parameterType="position" resultType="Integer">
+		insert into t_position values(0,#{f_name},#{dept.f_id},#{position.f_id},1) 
+	</select>
+	<!-- 修改 -->
+	<select id="updatePosition" parameterType="position" resultType="Integer">
+		update t_position
+		<set>
+			<if test="f_name!=null and f_name!=''">
+				f_name=#{f_name},
+			</if>
+			<if test="dept!=null and dept.f_id!=null and dept.f_id!=''">
+				f_deptId=#{dept.f_id},
+			</if>
+			<if test="position!=null and position.f_id!=null and position.f_id!=''">
+				f_positionid=#{position.f_id}
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 恢复 -->
+	<select id="recoverPositionStatus" parameterType="position" resultType="Integer">
+		update t_position
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=1
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 注销 -->
+	<select id="cancelPositionStatus" parameterType="position" resultType="Integer">
+		update t_position
+		<set>
+			<if test="f_status!=null and f_status!=''">
+				f_status=0
+			</if>
+		</set>
+		<where>
+			<if test="f_id!=null">
+				f_id=#{f_id}
+			</if>
+		</where>
+	</select>
+	<!-- 查询所有模块 -->
+	<select id="queryAllModule" resultType="module">
+		select * from t_module
+	</select>
+	<!-- 查询权限对应模块 -->
+	<select id="selectOneModule" parameterType="position" resultType="auth">
+		select * from t_auth where f_positionId=#{f_id}
+	</select>
+	<!-- 增加权限 -->
+	<select id="addAuth" parameterType="auth" resultType="Integer">
+		insert into t_auth values(#{f_positionId},#{f_authId},0)
+	</select>
+	<!-- 删除权限 -->
+	<select id="removeAuth" parameterType="auth" resultType="Integer">
+		delete from t_auth where f_positionId=#{f_positionId}
+	</select>
+</mapper>

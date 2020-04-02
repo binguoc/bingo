@@ -1,0 +1,61 @@
+package com.ztkj.service.storageService.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.market.Order;
+import com.ztkj.entity.storage.Delivery;
+import com.ztkj.entity.storage.Storage;
+import com.ztkj.mapper.storageMapper.DeliveryMapper;
+import com.ztkj.service.storageService.DeliveryService;
+
+@Service("deliveryService")
+public class DeliveryServiceImpl implements DeliveryService {
+
+	@Autowired
+	private DeliveryMapper deliveryMapper;
+
+	@Override
+	public PageInfo<Delivery> queryAllDelivery(Integer pageNum,Delivery delivery) throws Exception {
+		
+		Integer pageSize = 3;
+		PageHelper.startPage(pageNum, pageSize);//分页插件，专门用于myBatis分页
+		List<Delivery> list = deliveryMapper.queryAllDelivery(delivery);
+		PageInfo<Delivery> pageInfo = new PageInfo<Delivery>(list);
+		return pageInfo;
+	}
+
+	@Override
+	public Integer updateDeliveryDeStatic(Delivery delivery) throws Exception {
+		Integer flag = deliveryMapper.updateDeliveryDeStatic(delivery);
+		return flag;
+	}
+
+	@Override
+	public List<Order> queryOrderIDStatic() throws Exception {
+		List<Order> list = deliveryMapper.queryOrderIDStatic();
+		return list;
+	}
+
+	@Override
+	public List<Storage> queryAllStorage() throws Exception {
+		List<Storage> list =deliveryMapper.queryAllStorage();
+		return list;
+	}
+
+	@Override
+	public Integer addDelivery(Delivery delivery) throws Exception {
+		Integer flag = deliveryMapper.addDelivery(delivery);
+		return flag;
+	}
+
+	@Override
+	public List<Delivery> queryByDid(Order order) throws Exception {
+		List<Delivery> list=	deliveryMapper.queryByDid(order);
+		return list;
+	}
+}

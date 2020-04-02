@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.purchaseMapper.WarestypeMapper">
+	<select id="queryAllBrands" resultType="brand">
+		select brId,brName from brand  where brStatus=1
+	</select>
+	
+	<select id="queryWarestypeByPage" resultType="warestype" parameterType="warestype">
+		select w.*,b.brName,e.f_name empName
+			from warestype w,brand b,t_emp e 
+				where w.brandid=b.brId 
+					and w.waEmpid=e.f_id 
+						and b.brStatus=1 
+							and e.F_status=1
+							<if test="brandid!=null">
+								and brandid = #{brandid}
+							</if>
+							<if test="waName!=null and waName!=''">
+								and waName like '${waName}'
+							</if>
+							<if test="waStatus!=null">
+								and waStatus = #{waStatus}
+							</if>
+	</select>
+	
+	<select id="queryWarestypeById" parameterType="warestype" resultType="warestype">
+		select w.*,b.brName,e.f_name  empName
+			from warestype w,brand b,t_emp e 
+				where w.brandid=b.brId 
+					and w.waEmpid=e.f_id 
+						and waId=#{waId}
+	</select>
+	
+	<update id="updateWarestype" parameterType="warestype">
+		update  warestype set 
+			<if test="brandid!=null and brandid!=''">
+				brandid=#{brandid},
+			</if>
+			<if test="waName!=null and waName!=''">
+				waName=#{waName},
+			</if>
+			<if test="waStatus!=null">
+				waStatus=#{waStatus}
+			</if>
+			<where>
+			 waId=#{waId}
+			</where>
+	</update>
+	
+	<insert id="addWarestype" parameterType="warestype">
+		insert into warestype values(null,#{brandid},#{waName},#{waCreatetime},#{waStatus},#{empId})
+	</insert>
+	
+	
+	
+</mapper>

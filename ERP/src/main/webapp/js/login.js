@@ -1,0 +1,59 @@
+function loginUser() {
+	var f_id=$(".loginuser").val();
+	var f_password=$(".loginpwd").val();
+	var yzm=$("#yzm").val();
+	$.ajax({
+		url:"LoginUser.action",
+		data:{"f_id":f_id,"f_password":f_password,"yzm":yzm},
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			if (result==-1) {
+				alert("验证码错误！");
+			} else if (result==-2) {
+				alert("账号为空！");
+			}else if (result==-3) {
+				alert("密码为空！");
+			}else if (result==-4) {
+				alert("账号不存在！");
+			}else if (result==-5) {
+				alert("密码错误！");
+			}else if (result==1){
+				window.location="main.html";
+			}else {
+				alert("出错！");
+			}
+		}
+	});
+}
+function DeleteUser() {
+	$.ajax({
+		url:"DeleteUser.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			top.location.href="login.html";
+		}
+	});
+}
+function toCode() {
+	var code=window.document.getElementById("code");
+	code.src="/ERP/getCode.action?date="+new Date();
+}
+
+function queryUser(){
+	$.ajax({
+		url:"queryUserBean.action",
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var dept=result.f_positionid.dept==null?"":result.f_positionid.dept.f_name;
+			dept+=result.f_positionid==null?"":result.f_positionid.f_name;
+			$("#f_name").html(dept+":"+result.f_name);
+		}
+	});
+}
+

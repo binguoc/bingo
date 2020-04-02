@@ -1,0 +1,642 @@
+
+var i=1;
+var page;
+var k=1;
+
+function deleteTbody(){
+	$(".tablelist tbody tr:last").remove();
+	getTotalMoney(k);
+	if(i>0){
+		i--;
+	}
+	k--;
+}
+
+// 查询所有商品品牌
+function addTbody(){
+	var m=$("input[name='tip']").val();
+	k++;
+	$.ajax({
+		url:"queryByAllBrname.action",
+		dataType:"json",
+		type:"post",
+		async:false,
+		success:function(result){
+			page=result;
+			var tds="";
+			tds+="<tr class='a"+k+"'>";
+			tds+="<td>"+ (++m) +"</td>";
+			tds+="<td>";
+			tds+="<select class='br"+k+"' onchange='isChange(this)' name='deList["+(k-2)+"].deBrname'>";
+			tds+="<option value=''>--请选择--</option>";
+			$(result).each(function(){
+				tds+="<option value='"+this.brId+"'>"+this.brName+"</option>";
+			});
+			tds+="</select>";
+			tds+="</td>";
+			tds+="<td>";
+			tds+="<select class='ty"+k+"' onchange='isChange2(this)' name='deList["+(k-2)+"].deTypename'>" +
+				"<option value=''>--请选择--</option>"
+				"</select>";
+			tds+="</td>";
+			tds+="<td>";
+			tds+="<select class='wa"+k+"' name='deList["+(k-2)+"].deWaname'>" +
+				"<option value=''>--请选择--</option>"
+				"</select>";
+			tds+="</td>";
+			tds+="<td>";
+			tds+="<select name='deList["+(k-2)+"].deFiname'>";
+			tds+="<option value=''>--请选择--</option>";
+			$.ajax({
+				url:"queryByAllFiname.action",
+				dataType:"json",
+				type:"post",
+				async:false,
+				success:function(result){
+					$(result).each(function(){
+						tds+="<option value='"+this.fiId+"'>"+this.fiName+"</option>";
+					});
+				}
+			});
+			tds+="</select>";
+			tds+="</td>";
+			tds+="<td><input class='deCount"+k+"' name='deList["+(k-2)+"].deCount' onblur='outCountmouse("+k+")' type='text'  /></td>";
+			tds+="<td>台</td>";
+			tds+="<td><input class='deMonovalent"+k+"' name='deList["+(k-2)+"].deMonovalent' onblur='outmouse("+k+")' type='text' /></td>";
+			tds+="<td><input class='totalMoney totalMoney"+k+"' name='deList["+(k-2)+"].deMoney' type='text' /></td>";
+			tds+="</tr>";
+			$(".tablelist tbody").append(tds);	
+		}
+	});
+	return page;
+};
+
+function isChange(obj){
+		$(obj).parent().parent().find("select").eq(2).html("<option>请选择</option>");
+		var id1=$(obj).val();
+		var option="";
+		$.ajax({
+			url:"queryByAllTypename.action",
+			data:{"brId":id1},
+			dataType:"json",
+			type:"post",
+			async:false,
+			success:function(result){
+				$(result).each(function(){
+					option+="<option value='"+this.waId+"'>"+this.waName+"</option>";
+				});
+				
+			}
+		});
+		$(obj).parent().parent().find("select").eq(1).html("<option>请选择</option>");
+		$(obj).parent().parent().find("select").eq(1).append(option);
+}
+
+function isChange2(obj){
+		var id2=$(obj).val();
+		option="";
+		$.ajax({
+			url:"queryByAllWaname.action",
+			data:{"waWarestypeid":id2},
+			dataType:"json",
+			type:"post",
+			async:false,
+			success:function(result){
+				$(result).each(function(){
+					option+="<option value='"+this.waId+"'>"+this.waName+"</option>";
+				});
+			}
+		});
+		$(obj).parent().parent().find("select:eq(2)").html("<option>请选择</option>");
+		$(obj).parent().parent().find("select:eq(2)").append(option);
+}
+
+// 计算一行金额
+function outCountmouse(obj){
+	var count=$(".deCount"+obj+"").val();
+	var monovalent=$(".deMonovalent"+obj+"").val();
+	if(count=="" || isNaN(count) || count<0){
+		alert("请输入正确的数量");
+		$(".deCount"+obj+"").val("");
+		$(".deMonovalent"+obj+"").val("");
+		return;
+	}
+	if(count!="" && monovalent!=""){
+		var deMoney=count*monovalent;
+		$(".totalMoney"+obj+"").val(deMoney);
+		getTotalMoney(obj);
+	}
+}
+
+// 计算一行金额
+function outmouse(obj){
+	var count=$(".deCount"+obj+"").val();
+	var monovalent=$(".deMonovalent"+obj+"").val();
+	if(count=="" || isNaN(count) || count<0){
+		alert("请输入正确的数量");
+		$(".deCount"+obj+"").val("");
+		$(".deMonovalent"+obj+"").val("");
+		return;
+	}
+	if(count!="" && monovalent!=""){
+		var deMoney=count*monovalent;
+		$(".totalMoney"+obj+"").val(deMoney);
+		getTotalMoney(obj);
+	}
+}
+
+function getTotalMoney(obj){
+	var totalMoney=0;
+	$(".totalMoney").each(function(){
+		totalMoney+=Number($(this).val());
+	});
+	$(".forminfo input[name='puTotalmoney']").val(totalMoney);
+	$("input[name='purchase.puTotalmoney']").val(totalMoney);
+}
+
+var j=1;
+function queryByPurchase(){
+	var data=$("#queryForm").serialize();
+	$.ajax({
+		url:"queryByPurchase.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var tds="";
+			$(result.list).each(function(){
+				tds+="<tr>";
+				tds+="<td>"+ ++i +"</td>";
+				tds+="<td>"+this.puRealid+"</td>";
+				tds+="<td>"+this.times+"</td>";
+				tds+="<td>"+this.realmoney+"</td>";
+				tds+="<td>"+this.puUserid+"</td>";
+				if(this.puStatus==1){
+					tds+="<td>"+"未审核"+"</td>";
+				}else if(this.puStatus==2){
+					tds+="<td>"+"审核中"+"</td>";
+				}else if(this.puStatus==3){
+					tds+="<td>"+"审核通过"+"</td>";
+				}else if(this.puStatus==4){
+					tds+="<td>"+"审核不通过"+"</td>";
+				}
+				if(this.puStatus==3 || this.puStatus==4){
+					tds+="<td>"+this.puStatusid+"</td>";
+					tds+="<td>"+this.statusTime+"</td>";
+				}else{
+					tds+="<td></td>";
+					tds+="<td></td>";
+				}
+				
+				tds+="<td align='left'>";
+				if(this.puStatus!=4){
+					tds+="<a href='purchaseView.html?puRealid="+this.puRealid+"' class='tablelink'>查看详情</a>&nbsp;&nbsp;";
+				}
+				if(this.puStatus==3){
+					tds+="<a href='../../storage/stock/stockView.html?puRealid="+this.puRealid+"' class='tablelink'>入库详情</a>&nbsp;&nbsp;";
+				}
+				if(this.puStatus==1 || this.puStatus==4){
+					tds+="<a href='purchaseUpdate.html?puRealid="+this.puRealid+"' class='tablelink'>修改</a>&nbsp;&nbsp;";
+				}
+				if(this.puStatus==1){
+					tds+="<a href='javascript:void(0)' onclick='deltipOpen(\""+this.puRealid+"\")' class='tablelink'>删除</a>&nbsp;&nbsp;";
+				}
+				if(this.puStatus==1 || this.puStatus==4){
+					tds+="<a href='javascript:void(0)' class='tablelink' onclick='examinetipOpen(\""+this.puRealid+"\")'>提交审核</a>&nbsp;&nbsp;";
+				}
+				tds+="</td>";
+				tds+="</tr>";
+			});
+			$("table tbody").html(tds);
+			queryPage(page);
+		}
+	});
+	i=0;
+};
+
+// 分页查询点击事件
+function queryPage(value){ 
+	var pageNum=value.pageNum;
+	if(pageNum+1>value.pages){
+		pageNum=value.pages;
+	}
+	var divs="";
+	divs+="<li class='paginItem'><a href='javascript:toPage("+(((pageNum-1)<1)?1:(pageNum-1))+");'><span class='pagepre'></span></a></li>";
+	if(value.hasPreviousPage){
+		divs+="<li class='paginItem'><a href='javascript:toPage("+(pageNum-1)+");'>"+(pageNum-1)+"</a></li>";
+	}
+	divs+="<li class='paginItem current'><a href='javascript:toPage("+pageNum+");'>"+pageNum+"</a></li>";
+	if(value.hasNextPage){
+		divs+="<li class='paginItem'><a href='javascript:toPage("+(pageNum+1)+");'>"+(pageNum+1)+"</a></li>";
+	}
+	divs+="<li class='paginItem'><a href='javascript:toPage("+((pageNum<value.pages)?(pageNum+1):value.pages)+");'><span class='pagenxt'></span></a></li>";
+    $(".paginList").html(divs);
+	$(".pagin .message i:eq(0)").text(value.total);
+	$(".pagin .message i:eq(1)").text(pageNum+" ");
+}
+
+// 分页的方法
+function toPage(value){
+		if(value){
+			$("#queryForm input[name='pageNum']").val(value);
+		}
+		queryByPurchase();
+};
+
+
+function queryByOnePuAndDeVo(){
+	$.ajax({
+		url:"queryByOnePuAndDeVo.action",
+		data:{"puRealid":getUrlParam("puRealid")},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			var status=result.purchase.puStatus;
+			$(".forminfo li:eq(0) cite").html(result.purchase.puRealid);
+			$(".forminfo li:eq(1) cite").html(result.purchase.times);
+			$(".forminfo li:eq(2) cite").html(result.purchase.realmoney);
+			$(".forminfo li:eq(3) cite").html(result.purchase.puUserid);
+			if(result.purchase.puStatus==1){
+				status="未审核";
+			}else if(result.purchase.puStatus==2){
+				status="审核中";
+			}else if(result.purchase.puStatus==3){
+				status="审核通过";
+			}else if(result.purchase.puStatus==4){
+				status="审核不通过";
+			}
+			$(".forminfo li:eq(4) cite").html(status);
+			$(".forminfo li:eq(5) cite").html(result.purchase.puOpinion);
+			$(".forminfo li:eq(6) cite").html(result.purchase.puStatusid);
+			$(".forminfo li:eq(7) cite").html(result.purchase.statusTime);
+			var tds="";
+			$(result.deList).each(function(){
+				tds+="<tr>";
+				tds+="<td>"+ ++i +"</td>";
+				tds+="<td>"+this.deBrname+"</td>";
+				tds+="<td>"+this.deTypename+"</td>";
+				tds+="<td>"+this.deWaname+"</td>";
+				tds+="<td>"+this.deFiname+"</td>";
+				tds+="<td>"+this.deCount+"</td>";
+				tds+="<td>"+this.deWaUnit+"</td>";
+				tds+="<td>"+this.deMonovalent+"</td>";
+				tds+="<td>"+this.deMoney+"</td>"; 
+				tds+="</tr>";
+				$(".tablelist input[name='deId']").val(this.deId);
+			});
+			$(".tablelist tbody").html(tds);
+			
+		}
+	});
+	i=0;
+}
+
+function queryByOnePuAndDeVo3(){
+	$.ajax({
+		url:"queryByOnePuAndDeVo3.action",
+		data:{"puRealid":getUrlParam("puRealid")},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			$(".forminfo li:eq(0) cite").html(result.purchase.puRealid);
+			$(".forminfo li:eq(1) cite").html(result.purchase.times);
+			$(".forminfo li:eq(2) cite").html(result.purchase.realmoney);
+			$(".forminfo li:eq(3) cite").html(result.purchase.puUserid);
+			$("input[name='puStatusid']").html(result.purchase.puUserid);
+			$("input[name='puAuduttime']").html(result.purchase.statusTime);
+			var tds="";
+			$(result.deList).each(function(){
+				tds+="<tr>";
+				tds+="<td>"+ ++i +"</td>";
+				tds+="<td>"+this.deBrname+"</td>";
+				tds+="<td>"+this.deTypename+"</td>";
+				tds+="<td>"+this.deWaname+"</td>";
+				tds+="<td>"+this.deFiname+"</td>";
+				tds+="<td>"+this.deCount+"</td>";
+				tds+="<td>"+this.deWaUnit+"</td>";
+				tds+="<td>"+this.deMonovalent+"</td>";
+				tds+="<td>"+this.deMoney+"</td>"; 
+				tds+="</tr>";
+				$(".tablelist input[name='deId']").val(this.deId);
+			});
+			$(".tablelist tbody").html(tds);
+			
+		}
+	});
+	i=0;
+}
+		 
+function deletePurchase(puRealid){
+	$.ajax({
+		url:"deletePurchase.action",
+		data:{"puRealid":puRealid},
+		dataType:"json",
+		type:"post",
+		success:function(){
+			window.location.href="purchaseList.html";
+		}		
+	});
+}
+
+function queryMaxId(){
+	$.ajax({
+		url:"queryMaxId.action",
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			$(".forminfo input[name='puRealid']").val(result.puRealid);
+			$(".forminfo input[name='puTime']").val(result.times);
+			$("#addDetailedForm input[name='puId']").val(result.puRealid);
+		}
+	});
+	
+	$.ajax({
+		url:"queryNameid.action",
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			$(".forminfo input[name='Userid']").val(result.f_name);
+			$(".forminfo input[name='puUserid']").val(result.f_z);
+		}
+	});
+}
+
+
+function addPurchase(){
+	var data1=$("#addPurchaseForm").serialize();
+	$.ajax({
+		url:"addPurchase.action",
+		data:data1,
+		dataType:"json",
+		type:"post",
+		success:function(){
+			alert("添加成功");
+		}
+	});
+		var data2=$("#addDetailedForm").serialize();
+		$.ajax({
+			url:"addDetailed.action",
+			data:data2,
+			dataType:"json",
+			type:"post",
+			success:function(){
+			}
+		});
+	window.location.href="purchaseList.html";
+}
+
+//修改订单详情表
+function queryByOnePuAndDeVo2(){
+	$.ajax({
+		url:"queryByOnePuAndDeVo.action",
+		data:{"puRealid":getUrlParam("puRealid")},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			$(".forminfo input[name='purchase.puRealid']").val(result.purchase.puRealid);
+			$(".forminfo input[name='purchase.puTime']").val(result.purchase.times);
+			$("input[name='purchase.puTotalmoney']").val(result.purchase.puTotalmoney);
+			$(".forminfo input[name='puTotalmoney']").val(result.purchase.realmoney);
+			$(".forminfo input[name='purchase.puUserid']").val(result.purchase.puUserid);
+			$("input[name='deList[0].puId']").val(result.purchase.puRealid)
+			var status=result.purchase.puStatus;
+			if(result.purchase.puStatus==1){
+				status="未审核";
+			}else if(result.purchase.puStatus==2){
+				status="审核中";
+			}else if(result.purchase.puStatus==3){
+				status="审核通过";
+			}else if(result.purchase.puStatus==4){
+				status="审核不通过";
+			}
+			$(".forminfo input[name='puStatus']").val(status);
+			$("input[name='purchase.puStatus']").val(result.purchase.puStatus)
+			$(result.deList).each(function(){
+				var tds="";
+				tds+="<tr class='a"+k+"'>";
+				tds+="<td>"+k+"</td>";
+				tds+="<td>";
+				tds+="<select class='br"+k+"' onchange='isChange(this)' name='deList["+(k-1)+"].deBrname'>";
+				tds+="<option value=''>--请选择--</option>";
+				var Brid=this.deBrid;
+				$.ajax({
+					url:"queryByAllBrname.action",
+					dataType:"json",
+					type:"post",
+					async:false,
+					success:function(result){
+						$(result).each(function(){
+							if(this.brId==Brid){
+								tds+="<option value='"+this.brId+"' selected='selected'>"+this.brName+"</option>";
+							}else{
+								tds+="<option value='"+this.brId+"'>"+this.brName+"</option>";
+							}
+						});
+					}
+				});
+				tds+="</select>";
+				tds+="</td>";
+				tds+="<td>";
+				tds+="<select class='ty"+k+"' onchange='isChange2(this)' name='deList["+(k-1)+"].deTypename'>";
+				tds+="<option value=''>--请选择--</option>";
+				var id1=this.deBrid;
+				$.ajax({
+					url:"queryByAllTypename.action",
+					data:{"brId":id1},
+					dataType:"json",
+					type:"post",
+					async:false,
+					success:function(result){
+						$(result).each(function(){
+							if(this.waId==id1){
+								tds+="<option value='"+this.waId+"' selected='selected'>"+this.waName+"</option>";
+							}else{
+								tds+="<option value='"+this.waId+"'>"+this.waName+"</option>";
+							}
+						});
+					}
+				});
+				tds+="</select>";
+				tds+="</td>";
+				tds+="<td>";
+				tds+="<select class='wa"+k+"' name='deList["+(k-1)+"].deWaname'>";
+				tds+="<option value=''>--请选择--</option>";
+				var id2=this.deTypeid;
+				var id3=this.deWaid;
+				$.ajax({
+					url:"queryByAllWaname.action",
+					data:{"waWarestypeid":id2},
+					dataType:"json",
+					type:"post",
+					async:false,
+					success:function(result){
+						$(result).each(function(){
+							if(this.waId==id3){
+								tds+="<option value='"+this.waId+"' selected='selected'>"+this.waName+"</option>";
+							}else{
+								tds+="<option value='"+this.waId+"'>"+this.waName+"</option>";
+							}
+						});
+					}
+				});
+				
+				tds+="</select>";
+				tds+="</td>";
+				tds+="<td>";
+				tds+="<select name='deList["+(k-1)+"].deFiname'>";
+				tds+="<option value=''>--请选择--</option>";
+				var Fiid=this.deFiid;
+				$.ajax({
+					url:"queryByAllFiname.action",
+					dataType:"json",
+					type:"post",
+					async:false,
+					success:function(result){
+						$(result).each(function(){
+							if(this.fiId==Fiid){
+								tds+="<option value='"+this.fiId+"' selected='selected'>"+this.fiName+"</option>";
+							}else{
+								tds+="<option value='"+this.fiId+"'>"+this.fiName+"</option>";
+							}
+						});
+					}
+				});
+				tds+="</select>";
+				tds+="</td>";
+				tds+="<td><input class='deCount"+k+"' value='"+this.deCount+"' name='deList["+(k-1)+"].deCount' onblur='outCountmouse("+k+")' type='text'  /></td>";
+				tds+="<td>台</td>";
+				tds+="<td><input class='deMonovalent"+k+"' value='"+this.deMonovalent+"' name='deList["+(k-1)+"].deMonovalent' onblur='outmouse("+k+")' type='text' /></td>";
+				tds+="<td><input class='totalMoney totalMoney"+k+"' value='"+this.deMoney+"' name='deList["+(k-1)+"].deMoney' type='text' /></td>";
+				tds+="</tr>";
+				$("input[name='tip']").val(k);
+				$(".tablelist tbody").append(tds);
+				
+			});
+			}
+		});
+	i=0;
+};
+
+function updateDetailed(){
+	var data=$("#updatePurchaseForm").serialize();
+	$.ajax({
+		url:"updateDetailed.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(){
+			window.location.href="purchaseList.html";
+		}
+	});
+
+}
+
+
+function queryStatus(){
+	var data=$("#queryForm").serialize();
+	$.ajax({
+		url:"queryStatus.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			page=result;
+			var tds="";
+			$(result.list).each(function(){
+					tds+="<tr>";
+					tds+="<td>"+ ++i +"</td>";
+					tds+="<td>"+this.puRealid+"</td>";
+					tds+="<td>"+this.times+"</td>";
+					tds+="<td>"+this.realmoney+"</td>";
+					tds+="<td>"+this.puUserid+"</td>";
+					tds+="<td>"+"审核中"+"</td>";
+					tds+="<td align='left'>";
+					tds+="<a href='purchaseExamine.html?puRealid="+this.puRealid+"' class='tablelink'>审核</a>&nbsp;&nbsp;";
+					tds+="</td>";
+					tds+="</tr>";
+				});
+			$("table tbody").html(tds);
+			queryPage(page);
+		}
+	});
+	i=0;
+};
+
+function updateStatus(){
+	var puOpinion=$(".textinput").val();
+	var puStatus=$(".dfselect").val();
+	var puStatusid=$("input[name='puStatusid']").val();
+	var puAuduttime=$("input[name='puAuduttime']").val();
+	$.ajax({
+		url:"updateStatus.action",
+		data:{"puOpinion":puOpinion,"puStatus":puStatus,"puRealid":getUrlParam("puRealid"),"puStatusid":puStatusid,"puAuduttime":puAuduttime},
+		dataType:"json",
+		type:"post",
+		success:function(){
+			window.location.href="purchaseExamineList.html";
+		}
+	});
+}
+
+function queryAllAudut(){
+	$.ajax({
+		url:"queryAllAudut.action",
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			var optiona="";
+			optiona+="<option value=''>--请选择--</option>";
+			$(result).each(function(){
+				optiona+="<option value='"+this.positionId+"'>"+this.positionName+"</option>";
+			});
+			$(".tipinfo1 .dfselect:eq(1)").html(optiona);
+			
+		}
+	});
+}
+
+function userChange(){
+	var positionId=$(".tipinfo1 .dfselect:eq(1)").val();
+	$.ajax({
+		url:"queryAllUser.action",
+		data:{"positionId":positionId},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			var optionb="";
+			optionb+="<option value=''>--请选择--</option>";
+			$(result).each(function(){
+				optionb+="<option value='"+this.userId+"'>"+this.userName+"</option>";
+			});
+			$(".tipinfo1 .dfselect:eq(2)").html(optionb);
+			
+		}
+	});
+}
+
+function updateStatusAndUser(){
+	var data=$("#updateForm").serialize();
+	$.ajax({
+		url:"updateStatusAndUser.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(){
+			window.location.href="purchaseList.html";
+		}
+	});
+
+}
+
+/**
+ * 获取地址栏传值
+ * 
+ * @param name
+ * @returns
+ */
+function getUrlParam(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); // 构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg);  // 匹配目标参数
+    if (r != null) return unescape(r[2]); return null; // 返回参数值
+}

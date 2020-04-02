@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.marketMapper.OrderMapper">
+	<resultMap type="order" id="selectOrder">
+		<id property="f_id" column="f_id"/>
+		<result property="f_did" column="f_did"/>
+		<result property="f_company" column="f_company"/>
+		<result property="f_status" column="f_status"/>
+		<result property="f_date" column="f_date"/>
+		<result property="f_view" column="F_view"/>
+		<result property="f_Moneysum" column="f_Moneysum"/>
+		<association property="client" javaType="client">
+			<id property="f_id" column="f_name"/>
+			<result property="f_name" column="cname"/>
+			<result property="f_tel" column="f_tel"/>
+		</association>
+		<association property="f_dpeople" javaType="user">
+			<id property="f_id" column="f_dpeople"/>
+			<result property="f_name" column="uname"/>
+		</association>
+		<association property="f_auditor" javaType="user">
+			<id property="f_id" column="f_auditor"/>
+			<result property="f_name" column="uname2"/>
+		</association>
+	
+	</resultMap>
+	<select id="selectbyClinetid" resultType="client">
+		
+	</select>
+
+
+	<select id="selectByPage" parameterType="order" resultMap="selectOrder">
+		select o.*,t.f_name cname,t.f_tel,te.f_name uname,te2.f_name uname2 from t_order o left JOIN t_client t ON o.F_name=t.f_id left join t_emp te on o.F_dpeople=te.f_id  LEFT JOIN t_emp te2 on te2.f_id=o.F_auditor 
+		<trim prefix="where" prefixOverrides="and">
+				<if test="f_dpeople.f_id!='1013' and f_dpeople.f_id!='1001' and f_dpeople.f_id!='1106' ">
+					and o.F_dpeople= #{f_dpeople.f_id} 
+				</if>
+				<if test="f_did!=null and f_did!='' ">
+					and o.f_did like '%' #{f_did} '%' 
+				</if>
+				<if test="client!=null and client.f_name!='' ">
+					and t.f_name like '%' #{client.f_name} '%' 
+				</if>
+				<if test="startDate!=null and startDate!='' ">
+						and o.f_company &gt;= #{startDate}
+				</if>
+				<if test="emdDate!=null and emdDate!='' ">
+						and o.f_company &lt;= #{emdDate}
+				</if>
+				<if test="minMoney!=null and minMoney!='' ">
+						and o.f_Moneysum &gt;= #{minMoney}
+				</if>
+				<if test="maxMoney!=null and maxMoney!='' ">
+						and o.f_Moneysum &lt;= #{maxMoney}
+				</if>
+				<if test="f_status!=null and f_status!='0' ">
+						and o.f_status = #{f_status}
+				</if>
+				
+			</trim>
+	</select>
+	<select id="selectAllOrderExaminee" parameterType="order" resultMap="selectOrder">
+		select o.*,t.f_name cname,t.f_tel,te.f_name uname,te2.f_name uname2 from t_order o left JOIN t_client t ON o.F_name=t.f_id left join t_emp te on o.F_dpeople=te.f_id  LEFT JOIN t_emp te2 on te2.f_id=o.F_auditor 
+		<trim prefix="where" prefixOverrides="and">
+				<if test="f_auditor!=null and f_auditor.f_id!='' and f_auditor.f_id!='1001' ">
+					and o.F_auditor= #{f_auditor.f_id} 
+				</if>
+				<if test="f_did!=null and f_did!='' ">
+					and o.f_did like '%' #{f_did} '%' 
+				</if>
+				<if test="client!=null and client.f_name!='' ">
+					and t.f_name like '%' #{client.f_name} '%' 
+				</if>
+				<if test="startDate!=null and startDate!='' ">
+						and o.f_company &gt;= #{startDate}
+				</if>
+				<if test="emdDate!=null and emdDate!='' ">
+						and o.f_company &lt;= #{emdDate}
+				</if>
+				<if test="minMoney!=null and minMoney!='' ">
+						and o.f_Moneysum &gt;= #{minMoney}
+				</if>
+				<if test="maxMoney!=null and maxMoney!='' ">
+						and o.f_Moneysum &lt;= #{maxMoney}
+				</if>
+				and o.f_status ='2'
+			</trim>
+	</select>
+	<select id="selectAllClient" parameterType="user" resultType="client">
+		select * from t_client where F_status='1' 
+			<if test="f_id!=null and f_id!='' and f_id!='1001' ">
+				and F_service = #{f_id}
+			</if>
+	</select>
+	<select id="selectAllBrand" resultType="Brand">
+		select * from brand where brStatus='1'
+	</select>
+	<select id="selectAllWarestype" parameterType="Integer" resultType="warestype">
+		select * from warestype where brandid=#{brId} and waStatus='1'
+	</select>
+	<select id="selectAllWares" parameterType="Integer" resultType="wares">
+		select * from wares where waWarestypeid=#{waId}  and waStatus='1'
+	</select>
+	<select id="selectAllFirm" parameterType="Integer" resultType="firm">
+		select * from wares w left join waresfirm wf on w.waId=wf.waId left join firm f on wf.fiId=f.fiId where w.waId=#{waId} and fiStatus='1'
+	</select>
+	<insert id="addOrder" parameterType="order">
+		insert into t_order values(null,#{f_did},#{client.f_id},#{f_company},#{f_dpeople.f_id},#{f_status},null,null,#{f_Moneysum},null)
+	</insert>
+	<insert id="addProductdetail" parameterType="productdetailVO">
+		insert into t_order values(null,#{order.f_did},#{order.client.f_id},#{order.f_company},#{order.f_dpeople.f_id},#{order.f_status},null,null,#{order.f_Moneysum},null);
+      	insert into t_productdetail VALUES
+      <foreach collection="list" item="productdetail" separator=",">
+        (null,#{productdetail.order.f_did},#{productdetail.wares.waId},#{productdetail.firm.fiId},#{productdetail.f_status},#{productdetail.f_auditor},#{productdetail.f_count},#{productdetail.f_Money})
+      </foreach>
+    </insert>
+    
+    <select id="selectById" parameterType="order" resultMap="selectOrder">
+    	select o.*,t.f_name cname,t.f_tel,te.f_name uname,te2.f_name uname2 from t_order o left JOIN t_client t ON o.F_name=t.f_id left join t_emp te on o.F_dpeople=te.f_id  LEFT JOIN t_emp te2 on te2.f_id=o.F_auditor where o.f_did=#{f_did}
+    </select>
+    
+    
+    <resultMap type="productdetail" id="selectproductdetail">
+		<id property="f_id" column="f_id"/>
+		<result property="f_status" column="f_status"/>
+		<result property="f_auditor" column="f_auditor"/>
+		<result property="f_count" column="f_count"/>
+		<result property="f_Money" column="f_Money"/>
+		<result property="logo" column="logo"/>
+		<result property="logoid" column="logoid"/>
+		<result property="type" column="type"/>
+		<result property="typeid" column="typeid"/>
+		<association property="order" javaType="order">
+			<result property="f_did" column="f_did"/>
+		</association>
+		<association property="wares" javaType="wares">
+			<id property="waId" column="F_modelid"/>
+			<result property="waName" column="waName"/>
+		</association>
+		<association property="firm" javaType="firm">
+			<id property="fiId" column="f_firmid"/>
+			<result property="fiName" column="fiName"/>
+		</association>
+	
+	</resultMap>
+	
+	
+    <select id="selectDalByDId" parameterType="productdetail" resultMap="selectproductdetail">
+    	select tp.*,w.waName,f.fiName,wt.waName type,wt.waid typeid,b.brName logo,b.brId logoid from t_productdetail tp LEFT JOIN wares w on tp.F_modelid=w.waId  LEFT JOIN firm f on f.fiId=tp.f_firmid
+		LEFT JOIN warestype wt on wt.waId=w.waWarestypeid LEFT JOIN brand b on b.brId=w.waBrandid where tp.f_did=#{order.f_did}
+    </select>
+    
+    
+    <update id="updateProductdetail" parameterType="productdetailVO">
+    	update t_order set f_name=#{order.client.f_id},f_company=#{order.f_company},f_dpeople=#{order.f_dpeople.f_id},f_status=#{order.f_status},f_Moneysum=#{order.f_Moneysum} where f_id=#{order.f_id};
+      <foreach collection="list" item="productdetail" separator=";">
+      	<if test="productdetail.f_id!=null and productdetail.f_id!='' ">
+      		update t_productdetail set F_modelid=#{productdetail.wares.waId},f_firmid=#{productdetail.firm.fiId},F_status=#{productdetail.f_status},F_auditor=#{productdetail.f_auditor},F_count=#{productdetail.f_count},F_Money=#{productdetail.f_Money} where f_id=#{productdetail.f_id}
+      	</if>
+      </foreach>
+    </update>
+    <delete id="deleteProductdetail" parameterType="productdetailVO">
+    	<foreach collection="f_ids" item="f_ids" separator=";">
+      	<if test="f_ids!=null and f_ids!='' ">
+      		delete FROM t_productdetail where f_id=#{f_ids}
+      	</if>
+      </foreach>
+    </delete>
+   <insert id="addProductdetail2" parameterType="productdetailVO">
+   <foreach collection="list" item="productdetail" separator=";">
+      	<if test="productdetail.f_id == null">
+      		 insert into t_productdetail VALUES (null,#{productdetail.order.f_did},#{productdetail.wares.waId},#{productdetail.firm.fiId},#{productdetail.f_status},#{productdetail.f_auditor},#{productdetail.f_count},#{productdetail.f_Money})
+      	</if>
+      </foreach>
+   </insert>
+   
+   <delete id="deleteProductdetailByDid" parameterType="order">
+   	delete FROM t_productdetail where f_did=#{f_did}
+   </delete>
+   <delete id="deleteOrder" parameterType="order">
+   	delete FROM t_order where f_did=#{f_did}
+   </delete>
+   <update id="updateOrderExamine">
+   	update t_order set f_status=#{f_status},f_view=#{f_view},f_auditor=#{f_auditor.f_id},f_date=SYSDATE() where f_id=#{f_id}
+   </update>
+   
+   <select id="selectPosition" resultType="position">
+   	select * from t_position where f_deptId='006' and f_name!='组员' and F_status='1'
+   </select>
+   <select id="selectUserById" parameterType="user" resultType="user">
+   	SELECT * FROM t_emp e where e.F_positionid=#{f_positionid.f_id}
+   </select>
+   <update id="updateOrderStatus" parameterType="order">
+   		update t_order set f_status='2',f_auditor=#{f_auditor.f_id} where f_id=#{f_id}
+   </update>
+   
+   
+   
+   
+</mapper>

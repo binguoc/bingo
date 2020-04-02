@@ -1,0 +1,101 @@
+/**
+ * 
+ */
+
+var page;
+function selectAllpage(){
+	var data = $("#selectForm").serialize();
+	$.ajax({
+		url:"dept_queryByPage.action",
+		data:data,
+		dataType:"json",
+		async:false,
+		type:"post",
+		success:function(result){
+			var str="";
+			page = result;
+			var i=1;
+			$(result.list).each(function(){
+				str += "<tr><td>"+i+"</td>"+"<td>"+this.f_id+"</td>"+"<td>"+this.f_name+"</td>"+"<td>"+(this.f_status==1?'正常':'不正常')+"</td>"+"<td><a href='#' class='tablelink'>修改</a>&nbsp&nbsp&nbsp<a href='javascript:void(0)' class='tablelink' onclick='tipOpen('是否确认恢复此条信息？')'>删除</a></td></tr>";
+				i++;
+			});
+			$("tbody").html(str);
+			$(".message i:eq(0)").html(result.total);
+			$(".message i:eq(1)").html(result.pageNum);
+			pageButton();
+		}
+	});
+}
+function toPage(pageNow){
+	$("input[name='pageNum']").val(pageNow);
+	selectAllpage();
+}
+function addDept(){
+	var data = $("#addForm").serialize();
+	$.ajax({
+		url:"dept_addUser.action",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			if(result==0){
+				alert("添加失败");
+				window.location.reload();
+			}else{
+				alert("添加成功");
+				window.location.href="deptList.html";
+			}
+		}
+	});
+}
+function update1(){
+	var deptno = getUrlParam("deptno");
+	$.ajax({
+		url:"EmpServlet?method=selectone",
+		data:{"deptno":deptno},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			$(result.list).each(function(){
+				$("input[name='deptno']").val(this.deptno);
+				$("input[name='dname']").val(this.dname);
+				$("input[name='loc']").val(this.loc);
+			});
+		}
+	});
+}
+function updateEmp(){
+	var data = $("#updateForm").serialize();
+	$.ajax({
+		url:"EmpServlet?method=updateEmp",
+		data:data,
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			if(result.flag=="true"){
+				alert("修改成功！");
+				window.location.href="empList.html";
+			}else{
+				alert("修改失败！请重新修改！！！");
+				window.location.reload();
+			}
+		}
+	});
+}
+function deleteEmp(deptno){
+	$.ajax({
+		url:"EmpServlet?method=deleteEmp",
+		data:{"deptno":deptno},
+		dataType:"json",
+		type:"post",
+		success:function(result){
+			if(result.flag=="true"){
+				alert("删除成功！");
+			}else{
+				alert("删除失败！请重新删除！！！");
+				window.location.reload();
+			}
+			window.location.href="empList.html";
+		}
+	});
+}

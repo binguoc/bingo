@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.ztkj.mapper.storageMapper.StockMapper">
+	
+	<resultMap type="stock" id="StockAndPurchase">
+		<id property="stoId" column="stoId" />
+		<result property="stoTime" column="stoTime"/>
+		<result property="stoMan" column="stoMan"/>
+		<result property="stoStatic" column="stoStatic"/>
+		<association property="storage" javaType="storage"><!-- 关联对象  取了别名 -->
+			<result property="stName" column="stName"/>
+		</association>
+		<association property="purchase" javaType="purchase">
+			<id property="puRealid" column="puRealid" />
+			<result property="puTotalmoney" column="puTotalmoney"/>
+		</association>
+	</resultMap>
+	
+	<!-- 分页查询所有的仓库 -->
+	
+	<select id="queryAllStock" parameterType="stock" resultMap="StockAndPurchase">
+		select pu.puRealid,pu.puTotalmoney,sto.stName,st.stoTime,st.stoMan,st.stoStatic,st.stoId from stock st left join  storaget sto on st.stoStorageId=sto.stId 
+			left join purchase pu on st.stPurchaseId=pu.puRealid
+				 <trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+				 	pu.puStatus=3 
+					 <if test="storage!=null and storage.stName!='' and storage.stName!=null">
+					 	and stName like '%' #{storage.stName} '%'
+					 </if>
+					 <if test="stoStatic!=-1 ">
+					 	and stoStatic=#{stoStatic}
+					 </if>
+					 <if test="purchase!=null and purchase.puRealid!='' and purchase.puRealid!=null">
+					 	and puRealid like '%' #{purchase.puRealid} '%'
+					 </if>
+				 </trim>
+	</select>
+	
+	
+	
+	<!-- 查询指定的仓库编号 -->
+	<select id="queryStorage" parameterType="Integer" resultType="Integer">
+		select st.stId from stock sto left join storaget st on st.stId=sto.stoStorageId where sto.stoId=#{stoId}
+	</select>
+	
+	<!-- 查询指定的订单编号 -->
+	<select id="queryPurchase" parameterType="Integer" resultType="String">
+		select pu.puRealid from stock sto left join purchase pu on sto.stPurchaseId=pu.puRealid where sto.stoId=#{stoId}
+	</select>
+	
+	
+	<!--根据 查询采购详情表  -->
+	<select id="queryDetailed" parameterType="string" resultType="detailed">
+		select de.deId,de.deWaid waresid,de.deFiid firmid,de.deCount from detailed de where de.puId=#{puRealid}
+	</select>
+	<!--订单明细表与库存表一致   修改功能  -->
+	<update id="updateInventory" parameterType="inventoryVo" > 
+     	update inventory  set inNum=inNum+ #{deCount} where inId=#{inId}
+	</update>
+	
+	<!--取消入库  修改功能  -->  
+	<update id="cancelStock" parameterType="inventoryVo" > 
+	
+     	update inventory  set inNum=inNum-#{deCount} where inId=#{inId}
+	</update>
+	
+	<!--不一致则新增  --> 
+	<insert id="addInventory" parameterType="inventory" >
+		insert into inventory values(null,#{stoId},#{waseId},#{inNum},#{firmId})
+	</insert>
+	
+	<resultMap type="inventory" id="queryInventoryStorageFirm">
+		<id property="inId" column="inId"/>
+		<association property="wares" javaType="wares">
+			<id property="waId" column="waId"/>
+		</association>
+		<association property="storage" javaType="storage">
+			<id property="stId" column="stId"/>
+		</association>
+		<association property="firm" javaType="firm">
+			<id property="fiId" column="fiId"/>
+		</association>
+		
+	</resultMap>
+	<!-- 查询id -->
+	<select id="queryInventoryAndStorage" resultMap="queryInventoryStorageFirm">
+		select inv.inStorageId stId,inv.reWaresId waId,inv.inFirmId fiId,inv.inId from inventory inv
+	</select>
+
+
+	
+	<!-- 入库与取消入库 -->
+	
+    <select id="recoverStatic" parameterType="stock" resultType="Integer">
+		update stock set stoStatic=1 where stoId=#{stoId}
+			
+	</select> 
+    <select id="cancelStatic" parameterType="stock" resultType="Integer">
+		update stock set stoStatic=0 where stoId=#{stoId}
+	</select> 
+	
+	
+	
+	
+
+	<!-- 查询所有的启用的仓库 -->
+	<select id="queryAllStorage" resultType="storage">
+		select st.stName,st.stId from storaget st where st.stStatus=1
+	</select>
+	
+	<!-- 查询所有审核通过的采购单  -->
+	<select id="queryAllPurchase" resultType="purchase">
+		select pu.puRealid from purchase pu where pu.puRealid not in( select st.stPurchaseId from stock st ) and pu.puStatus=3
+	</select>
+
+	<!-- 添加入库信息 -->
+	<select id="addStock" parameterType="stock" resultType="Integer">
+		insert into stock values(null,#{storage.stId},#{stoTime},#{stoMan},0,#{purchase.puRealid})
+	</select>
+	
+	<resultMap type="stock" id="purchaseAndStock">
+		<id property="stoId" column="stoId"/>
+		<result property="stoTime" column="stoTime"/>
+		<result property="stoMan" column="stoMan"/>
+		<result property="stoStatic" column="stoStatic"/>
+		<association property="storage" javaType="storage">
+			<id property="stId" column="stId"/>
+			<result property="stName" column="stName"/>
+		</association>
+	</resultMap>
+	<!-- 采购详情+入库信息 -->
+	<select id="queryByPuRealid" parameterType="purchase" resultMap="purchaseAndStock">
+		select sto.stId, sto.stName,st.stoTime,st.stoMan,st.stoStatic from stock st left join purchase pu on st.stPurchaseId=pu.puRealid 
+			left join storaget sto on st.stoStorageId=sto.stId where pu.puRealid=#{puRealid}
+	</select>
+	
+	
+	
+</mapper>
+

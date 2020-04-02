@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     <mapper namespace="com.ztkj.mapper.sysMapper.CityMapper">
+	    <resultMap type="city" id="ProvinceAndCity">
+	        <id property="city_id" column="city_id" />
+	        <result property="city_name" column="city_name"/>
+	        <!--  一对一关联 使用association-->
+	        <association property="province" javaType="province">
+	              	<id property="pro_id" column="pro_id"/>
+	              <result property="pro_name" column="pro_name"/>
+	        </association>
+	    </resultMap>
+         <select id="selectAllCity" parameterType="city" resultMap="ProvinceAndCity">
+              select tc.*,tp.pro_name from 
+              t_city tc left join t_province tp on tp.pro_id=tc.pro_id
+              <trim prefix="where" prefixOverrides="and" suffix="" suffixOverrides="">
+                    <if test="province!=null and province.pro_name!=null and province.pro_name!=''">
+                        and tp.pro_name like '%' #{province.pro_name} '%'
+                    </if>
+                    <if test="city_name!=null and city_name!='' ">
+                        and tc.city_name like '%' #{city_name} '%'
+                    </if>
+              </trim>
+         </select>
+
+     </mapper>

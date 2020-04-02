@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.purchaseMapper.WaresMapper">
+	<select id="queryAllBrandsWares" resultType="brand">
+		select brId,brName from brand  where brStatus=1
+	</select>
+	
+	<select id="queryWarestypeByBrId" resultType="warestype">
+		select * from warestype where brandid=#{brandid} and waStatus=1 
+	</select>
+	
+	<select id="queryWaresByPage" resultType="wares" parameterType="wares">
+		select w1.*,b.brName,w2.waName warestypeName,e.f_name empName 
+			from wares w1,warestype w2,brand b,t_emp e 
+				where w1.waWarestypeid=w2.waId 
+					and w1.waBrandid=b.brId 
+					and w1.waEmpid=e.f_id 
+					and b.brStatus=1 
+					and e.F_status=1
+					and w2.waStatus=1
+						<if test="waBrandid!=null">
+							and waBrandid=#{waBrandid}
+						</if>
+						<if test="waWarestypeid!=null">
+							and waWarestypeid=#{waWarestypeid}
+						</if>
+						<if test="waName!=null and waName!=''">
+							and w1.waName like '%${waName}%'
+						</if>
+						<if test="waStatus!=null">
+							and w1.waStatus = #{waStatus}
+						</if>
+	</select>
+	
+	<select id="queryWaresById" parameterType="wares" resultType="wares">
+		select w.*,e.f_name empName from wares w ,t_emp e where w.waempid=e.f_id and w.waId=#{waId}
+	</select>
+	
+	<update id="updateWares" parameterType="wares">
+		update wares set
+		<if test="waBrandid!=null">
+		 	waBrandid=#{waBrandid},
+		</if>
+		<if test="waWarestypeid!=null">
+			waWarestypeid=#{waWarestypeid},
+		</if>
+		<if test="waName!=null and waName!=''">
+			waName=#{waName},
+		</if>
+		<if test="waUnit!=null and waUnit!=''">
+			waUnit=#{waUnit},
+		</if>
+		<if test="waStatus!=null">
+			waStatus=#{waStatus}
+		</if>
+		where waId=#{waId}
+	</update>
+	
+	<insert id="addWares" parameterType="wares">
+		insert into wares values(null,#{waBrandid},#{waWarestypeid},#{waName},#{waCreatetime},#{waUnit},#{waStatus},#{waEmpid})
+	</insert>
+</mapper>

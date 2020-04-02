@@ -1,0 +1,50 @@
+package com.ztkj.controller.sysController;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.sys.Auth;
+import com.ztkj.entity.sys.Module;
+import com.ztkj.entity.sys.User;
+import com.ztkj.service.sysService.LeftService;
+
+@Controller
+public class Leftcontroller {
+
+	@Resource(name="leftService")
+	private LeftService leftService;
+	
+	
+	//查询所有模块
+	@RequestMapping("/selectOneModuleLeft.action")
+	@ResponseBody
+	public PageInfo<Auth> selectOneModuleLeft(User user) {
+		try {
+			PageInfo<Auth> pageInfo = leftService.selectOneModuleLeft(user);
+			return pageInfo;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	//查询所有模块
+	@RequestMapping("/queryAllModule.action")
+	@ResponseBody
+	public PageInfo<Module> queryAllModule(Module module) {
+		try {
+			PageInfo<Module> pageInfo = leftService.queryAllModule(module);
+			return pageInfo;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+}

@@ -1,0 +1,20 @@
+package com.ztkj.service.storageService;
+
+import java.util.List;
+
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.purchase.Purchase;
+import com.ztkj.entity.storage.Stock;
+import com.ztkj.entity.storage.Storage;
+
+public interface StockService {
+	public PageInfo<Stock> queryAllStock(Integer pageNum,Stock stock) throws Exception;
+
+	public Integer updateStatic(Stock stock)throws Exception;
+
+	public List<Storage> queryAllStorage()throws Exception;
+
+	public List<Purchase> queryAllPurchase()throws Exception;
+
+	public Integer addStock(Stock stock) throws Exception;
+}

@@ -1,0 +1,123 @@
+package com.ztkj.entity.purchase;
+
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.aspectj.apache.bcel.generic.NEW;
+
+/**
+ * 采购单表
+ * @author Brayden
+ *
+ */
+public class Purchase {
+	private String puRealid;//采购单id
+	private Date puTime;//采购时间
+	private int puTotalmoney;//金额
+	private int puStatus;//审核状态
+	private Date puAuduttime;//审核时间
+	private String puOpinion;//审核意见
+	private String puUserid;//操作人
+	private String puStatusid;//审核人
+	private int puStockStatus;//入库状态
+	
+	
+	public int getPuStockStatus() {
+		return puStockStatus;
+	}
+
+	public void setPuStockStatus(int puStockStatus) {
+		this.puStockStatus = puStockStatus;
+	}
+
+	public String getPuStatusid() {
+		return puStatusid;
+	}
+
+	public void setPuStatusid(String puStatusid) {
+		this.puStatusid = puStatusid;
+	}
+
+	public String getPuUserid() {
+		return puUserid;
+	}
+
+	public void setPuUserid(String puUserid) {
+		this.puUserid = puUserid;
+	}
+
+	public String getPuRealid() {
+		return puRealid;
+	}
+
+	public void setPuRealid(String puRealid) {
+		this.puRealid = puRealid;
+	}
+
+	public Date getPuTime() {
+		return puTime;
+	}
+	public void setPuTime(Date puTime) {
+		this.puTime = puTime;
+	}
+	public int getPuTotalmoney() {
+		return puTotalmoney;
+	}
+	public void setPuTotalmoney(int puTotalmoney) {
+		this.puTotalmoney = puTotalmoney;
+	}
+	public int getPuStatus() {
+		return puStatus;
+	}
+	public void setPuStatus(int puStatus) {
+		this.puStatus = puStatus;
+	}
+	public Date getPuAuduttime() {
+		return puAuduttime;
+	}
+	public void setPuAuduttime(Date puAuduttime) {
+		this.puAuduttime = puAuduttime;
+	}
+	public String getPuOpinion() {
+		return puOpinion;
+	}
+	public void setPuOpinion(String puOpinion) {
+		this.puOpinion = puOpinion;
+	}
+	
+	@Override
+	public String toString() {
+		return "Purchase [puRealid=" + puRealid + ", puTime=" + puTime + ", puTotalmoney=" + puTotalmoney
+				+ ", puStatus=" + puStatus + ", puAuduttime=" + puAuduttime + ", puOpinion=" + puOpinion + ", puUserid="
+				+ puUserid + ", puStatusid=" + puStatusid + "]";
+	}
+
+	public String getRealmoney(){
+		return "￥"+getCommaFormat();
+	}
+	
+	public String getCommaFormat() {
+		DecimalFormat moneyFormat = new DecimalFormat("#,###");
+		return moneyFormat.format(puTotalmoney);
+	}
+	public String getTime() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		return puTime==null?"":format.format(puTime);
+	}
+	
+	public String getNewTime() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+		return format.format(new Date());
+	}
+	
+	public String getTimes() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		return puTime==null?"":format.format(puTime);
+	}
+	
+	public String getStatusTime() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		return puAuduttime==null?"":format.format(puAuduttime);
+	}
+}

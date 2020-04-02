@@ -1,0 +1,55 @@
+package com.ztkj.entity.storage;
+
+
+import com.ztkj.entity.purchase.Firm;
+import com.ztkj.entity.purchase.Wares;
+
+import oracle.net.aso.a;
+
+public class Inventory {
+
+	private Integer inId;
+	private Integer inNum;
+	
+	
+	private Storage storage;  //库存表 与 仓库表  1:1
+	private Wares wares;  //品牌表 与 仓库表   1:n
+	private Firm firm;  //厂商表 与 仓库表   1:n
+	public Integer getInId() {
+		return inId;
+	}
+	public void setInId(Integer inId) {
+		this.inId = inId;
+	}
+	public Integer getInNum() {
+		return inNum;
+	}
+	public void setInNum(Integer inNum) {
+		this.inNum = inNum;
+	}
+	public Storage getStorage() {
+		return storage;
+	}
+	public void setStorage(Storage storage) {
+		this.storage = storage;
+	}
+	public Wares getWares() {
+		return wares;
+	}
+	public void setWares(Wares wares) {
+		this.wares = wares;
+	}
+	public Firm getFirm() {
+		return firm;
+	}
+	public void setFirm(Firm firm) {
+		this.firm = firm;
+	}
+	@Override
+	public String toString() {
+		return "Inventory [inId=" + inId + ", inNum=" + inNum + ", storage=" + storage + ", wares=" + wares + ", firm="
+				+ firm + "]";
+	}
+	
+	
+}

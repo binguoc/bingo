@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="../../js/storage/stock.js"></script>
+<script type="text/javascript">
+	$(function(){
+		queryAllStorage();
+		queryAllPurchase();
+		$(".dfinput").val(today()); 
+	});
+
+	 function today(){//构建方法
+	        var d=new Date();//new 出当前时间
+	        var year = d.getFullYear();
+		    var month = d.getMonth()+1;
+		    var date = d.getDate();
+		    var hour = d.getHours();
+		    var minute = d.getMinutes();
+		    var second = d.getSeconds();
+		    return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
+	}
+	
+	  
+	
+</script>
+</head>
+
+<body>
+<div class="place"> <span>位置：</span>
+  <ul class="placeul">
+    <li>仓库管理</li>
+    <li>入库管理</li>
+    <li>添加入库</li>
+  </ul>
+</div>
+<div class="formbody">
+<form id="addForm">
+  <div class="formtitle"><span>入库信息</span></div>
+  <ul class="forminfo">
+    <li>
+      <label>采购单编号</label>
+      <select name="purchase.puRealid" class="dfselect">
+         
+      </select>
+      &nbsp;&nbsp;
+      <a href="../../purchase/purchase/purchaseView.html" title="点击查看采购单详细信息" class="tablelink">详情</a>
+      <i>必须是审核通过的采购单</i>
+    </li>
+    <li>
+      <label>入库</label>
+      <select class="dfselect" name="storage.stId">
+         
+      </select>
+      <i>必选</i>
+    </li>
+    <li>
+      <label>入库时间</label>
+      <input name="stoTime" type="text" class="dfinput" readonly="readonly" value="" />
+      <i>必填</i>
+    </li>
+    <li>
+      <label>入库人</label>
+      <input name="stoMan" type="text" value="马云" readonly="readonly" class="roinput" />
+      <i>不能编辑</i>
+   
+    <li>
+      <label>&nbsp;</label>
+      <input name="" onclick="addStock()" type="button" class="btn" value="确认"/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <input name="" type="button" class="btn" value="返回" onclick="window.location.href='stockList.html'"/>
+    </li>
+  </ul>
+</form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ztkj.mapper.purchaseMapper.PurchaseMapper">
+	<sql id="mysql">
+		<if test="id!=null and id!=''">
+			and p.puRealid like '% ${id} %'
+		</if>
+		<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+			and p.puTime between #{startTime} and #{endTime}
+		</if>
+		<if test="startMoney!=null and endMoney!=''">
+			and p.puTotalmoney between #{startMoney} and #{endMoney}
+		</if>
+		<if test="status!=null and status!=''">
+			and p.puStatus=#{status}
+		</if>
+	</sql>	
+	<!--分页条件查询  -->
+	<select id="queryByPurchase" parameterType="purchaseVo" resultType="purchase">
+			select p.puRealid,p.puTime,p.puTotalmoney,
+			e.f_name puUserid,p.puStatus,te.f_name puStatusid,p.puAuduttime,p.puOpinion 
+			from purchase p left join t_emp e on p.puUserid=e.f_z
+			left join t_emp te on p.puStatusUserid=te.f_z
+			<trim prefix="where" prefixOverrides="and">
+				<include refid="mysql"/>
+			</trim>
+	</select>
+	<!--多表查询单个采购单表  -->
+	<select id="queryByOnePurchase" parameterType="string" resultType="purchase">
+			select p.puRealid,p.puTime,p.puTotalmoney,
+			e.f_name puUserid,p.puStatus,te.f_name puStatusid,p.puAuduttime,p.puOpinion,pd.* 
+			from purchase p left join pu_de pd on p.puRealid=pd.puRealId 
+			left join t_emp e on p.puUserid=e.f_z
+			left join t_emp te on p.puStatusUserid=te.f_z
+			where p.puRealid=#{puRealid}
+	</select>
+	
+	<!--多表查询单个采购详情表-->
+	<select id="queryByOneDetailed" parameterType="string" resultType="detailed">
+			select de.deId,br.brName deBrname,waty.waName deTypename,wa.waName deWaname,
+			wa.waUnit deWaUnit,fi.fiName deFiname,de.deCount,de.deMonovalent,de.deMoney 
+			from detailed de left join pu_de pd on pd.deId=de.deId
+			left join brand br on de.deBrid=br.brId
+			left join warestype waty on de.deWaTypeid=waty.waId
+			left join wares wa on de.deWaid=wa.waId
+			left join firm fi on de.defiid=fi.fiId
+			where pd.puRealId=#{puRealid}
+	</select>
+	
+	<select id="deletePurchase" parameterType="string">
+			delete from purchase where puRealid=#{puRealid};
+	</select>
+	<select id="queryByAllBrname" resultType="brand">
+			select * from brand
+	</select>
+	
+	<select id="queryByAllTypename" resultType="warestype">
+			select * from warestype
+	</select>
+	
+	<select id="queryMaxId" resultType="int">
+			select COUNT(*) from purchase
+	</select>
+	
+	<select id="queryByAllWaname" resultType="wares">
+			select * from wares
+	</select>
+	
+	<select id="queryByAllFiname" resultType="firm">
+			select * from firm
+	</select>
+	
+
+</mapper>

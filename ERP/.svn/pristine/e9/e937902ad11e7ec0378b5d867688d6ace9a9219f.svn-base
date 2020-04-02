@@ -1,0 +1,65 @@
+package com.ztkj.controller.purchaseController;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.github.pagehelper.PageInfo;
+import com.ztkj.entity.purchase.Detailed;
+import com.ztkj.entity.purchase.PuAndDeVo;
+import com.ztkj.entity.purchase.Purchase;
+import com.ztkj.entity.purchase.PurchaseVo;
+import com.ztkj.service.purchaseService.PurchaseService;
+
+@Controller
+@RequestMapping("/purchase/purchaseExamine")
+public class purchaseExiamineController {
+		String userName = "张明";
+		@Resource(name = "purchaseService")
+		private PurchaseService purchaseService;
+
+		@RequestMapping("/queryStatus.action")
+		@ResponseBody
+		public PageInfo<PurchaseVo> queryStatus(PurchaseVo vo) {
+			PageInfo<PurchaseVo> pageInfo = null;
+			try {
+				pageInfo = purchaseService.queryStatus(vo);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return pageInfo;
+		}
+		
+		@RequestMapping("queryByOnePuAndDeVo3.action")
+		@ResponseBody
+		public PuAndDeVo queryByOnePuAndDeVo3(String puRealid) {
+			System.out.println(puRealid);
+			PuAndDeVo vo=new PuAndDeVo();
+			try {
+				Purchase purchase = purchaseService.queryByOnePurchase(puRealid);
+				List<Detailed> list = purchaseService.queryByOneDetailed(puRealid);
+				vo.setPurchase(purchase);
+				vo.setDeList(list);
+			} catch (Exception e) { 
+				// TODO Auto-generated catch block e.printStackTrace();
+			}
+			System.out.println(vo);
+			return vo;
+		}
+		
+
+		@RequestMapping("/updateStatus.action")
+		@ResponseBody
+		public void updateStatus(Purchase purchase) {
+			try {
+				purchaseService.updateStatus(purchase);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+}
